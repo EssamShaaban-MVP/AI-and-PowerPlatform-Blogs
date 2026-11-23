@@ -3,3 +3,5 @@ dist/
 .astro/
 .DS_Store
 .env
+.playwright-mcp/
+public/7361289433-001.jpg
