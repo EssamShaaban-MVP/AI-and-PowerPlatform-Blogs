@@ -1,0 +1,11 @@
+---
+import Base from '../layouts/Base.astro';
+import { certifications } from '../data/site';
+---
+<Base title="Certifications | Essam Shaaban" description="Eight Microsoft certifications and Microsoft MVP recognition.">
+<section class="page-heading container"><span class="eyebrow">PROFESSIONAL GROWTH / 2022—2026</span><h1>Credentials that reflect<br/><span class="gradient-text">constant curiosity.</span></h1><p>A verified list of eight Microsoft certifications, transcribed from my Microsoft Learn credentials page. Expiry dates are shown where supplied.</p></section>
+<section class="container credentials-page"><div class="recognition-banner"><div class="recognition-emblem">✦</div><div><span class="tiny-label">COMMUNITY RECOGNITION</span><h3>Microsoft Most Valuable Professional</h3><p>Power Platform · Microsoft MVP</p></div><div class="banner-end">MVP <span>↗</span></div></div>
+{['AI & Agentic AI','Power Platform'].map(category=><div class="cert-group"><div class="cert-group-title"><span class="eyebrow">{category.toUpperCase()}</span><span>{certifications.filter(c=>c.category===category).length} CREDENTIALS</span></div><div class="cert-grid">{certifications.filter(c=>c.category===category).map(c=><article class="cert-card"><div class="cert-card-top"><div class:list={['credential-badge',c.tone]}>✧</div><span class="level-pill">{c.level}</span></div><div class="cert-code">{c.code || 'MICROSOFT CERTIFIED'}</div><h2>{c.title}</h2><div class="cert-dates"><span>Earned <strong>{c.earned}</strong></span>{c.expires && <span>Expires <strong>{c.expires}</strong></span>}</div></article>)}</div></div>)}
+<div class="cert-disclaimer">Certification titles and dates are based on the supplied Microsoft Learn screenshot. This site does not independently verify current credential status. Add your public Microsoft Learn transcript link in <code>src/data/site.ts</code> to enable verification.</div>
+</section>
+</Base>

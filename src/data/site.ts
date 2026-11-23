@@ -1,0 +1,33 @@
+export const site = {
+  name: 'Essam Shaaban',
+  role: 'Senior Software Engineer • Microsoft MVP',
+  headline: 'Designing practical AI systems. Building business solutions that last.',
+  intro: 'I work at the intersection of agentic AI, Microsoft Power Platform, and enterprise architecture—turning complex processes into reliable, human-centered solutions.',
+  location: 'Memphis, Tennessee',
+  // Add only public profiles that you have verified and wish to share.
+  links: {
+    linkedin: '',
+    github: '',
+    microsoftLearn: '',
+    email: '',
+  },
+};
+
+export const certifications = [
+  { code: 'AB-410', title: 'Intelligent Applications Builder Associate', level: 'Associate', category: 'AI & Agentic AI', earned: 'Aug 9, 2026', expires: 'Aug 10, 2027', tone: 'blue' },
+  { code: 'AI-103', title: 'Azure AI Apps and Agents Developer Associate', level: 'Associate', category: 'AI & Agentic AI', earned: 'Sep 13, 2026', expires: 'Sep 13, 2027', tone: 'blue' },
+  { code: 'AB-100', title: 'Agentic AI Business Solutions Architect Expert', level: 'Expert', category: 'AI & Agentic AI', earned: 'Oct 12, 2026', expires: 'Oct 11, 2027', tone: 'violet' },
+  { code: 'AB-730', title: 'AI Business Professional', level: 'Professional', category: 'AI & Agentic AI', earned: 'Mar 12, 2026', expires: null, tone: 'rose' },
+  { code: '', title: 'AI Transformation Leader', level: 'Professional', category: 'AI & Agentic AI', earned: 'Mar 2, 2026', expires: null, tone: 'rose' },
+  { code: 'AI-900', title: 'Azure AI Fundamentals', level: 'Fundamentals', category: 'AI & Agentic AI', earned: 'Sep 27, 2025', expires: null, tone: 'cyan' },
+  { code: 'PL-900', title: 'Power Platform Fundamentals', level: 'Fundamentals', category: 'Power Platform', earned: 'Feb 17, 2022', expires: null, tone: 'cyan' },
+  { code: 'PL-100', title: 'Power Platform App Maker Associate', level: 'Associate', category: 'Power Platform', earned: 'Feb 11, 2023', expires: null, tone: 'blue' },
+];
+
+// Public-safe summaries. Replace with approved case studies before publication.
+export const projects = [
+  { number: '01', type: 'Agentic AI / Architecture', title: 'Enterprise AI Solution Assessment', description: 'Evaluating agent frameworks, data access patterns and governance tradeoffs to choose the right technology for each business scenario.', tags: ['Microsoft Foundry', 'Copilot Studio', 'Architecture'], icon: '✦' },
+  { number: '02', type: 'Power Platform / Business Apps', title: 'Faculty Workflow Modernization', description: 'A multi-stage digital approval experience that makes complex review processes easier to navigate, audit and maintain.', tags: ['Power Apps', 'Dataverse', 'Power Automate'], icon: '◈' },
+  { number: '03', type: 'AI / Integration', title: 'Data-grounded Agent Prototypes', description: 'Exploring secure integration patterns between agent experiences, enterprise data sources and low-code front ends.', tags: ['Azure AI', 'Databricks', 'Logic Apps'], icon: '◎' },
+  { number: '04', type: 'Automation / Scale', title: 'Document Processing at Scale', description: 'Automating document conversion and orchestration with operational visibility and exception handling.', tags: ['Power Automate', 'SharePoint', 'Integration'], icon: '▧' },
+];
