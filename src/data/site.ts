@@ -6,10 +6,10 @@ export const site = {
   location: 'Memphis, Tennessee',
   // Add only public profiles that you have verified and wish to share.
   links: {
-    linkedin: '',
+    linkedin: 'https://www.linkedin.com/in/essam-shaaban-37a4371b1',
+    email: 'essam.shaaban77777@gmail.com',
+    mvp: 'https://mvp.microsoft.com/en-US/MVP/profile/480e02e6-5d73-4ace-bf70-43c208560dcd',
     github: '',
-    microsoftLearn: '',
-    email: '',
   },
 };
 
