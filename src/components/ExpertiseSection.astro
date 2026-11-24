@@ -5,6 +5,11 @@ const logo = (name: string) => `${base}/logos/${name}.svg`;
 
 // Logos are official product icons from Microsoft's Azure, Power Platform and Entra icon sets,
 // plus the Model Context Protocol mark. Files live in public/logos/.
+const tech: [string, string][] = [
+  ['Power Platform', 'power-platform'], ['Power Apps', 'power-apps'], ['Power Automate', 'power-automate'], ['Dataverse', 'dataverse'],
+  ['Copilot Studio', 'copilot-studio'], ['Microsoft Foundry', 'foundry'], ['Azure', 'azure'], ['Microsoft Entra ID', 'entra-id'],
+  ['Logic Apps', 'logic-apps'], ['Azure Functions', 'azure-functions'], ['Databricks', 'databricks'], ['MCP', 'mcp'],
+];
 const areas = [
   {
     label: '01 / INTELLIGENCE', title: 'Agentic AI & Copilots', logo: 'foundry',
@@ -51,6 +56,52 @@ const areas = [
   <div class="xp-grid">
     {areas.map(a => (
       <article class="expertise-card xp-card">
+        <div class="xp-illus" aria-hidden="true">
+          {a.logo === 'foundry' && (
+            <svg viewBox="0 0 320 150">
+              <rect class="il-panel" x="10" y="44" width="92" height="62" rx="10"/>
+              <text class="il-cap" x="22" y="62">PROMPT</text>
+              <rect class="il-line" x="22" y="72" width="64" height="5" rx="2.5"/><rect class="il-line" x="22" y="83" width="48" height="5" rx="2.5"/><rect class="il-line" x="22" y="94" width="56" height="5" rx="2.5"/>
+              <path class="il-wire" d="M102 75 C122 75 124 75 140 75"/>
+              <circle class="il-hub" cx="160" cy="75" r="24"/>
+              <path class="il-spark" d="M160 62l3.5 8.8 8.8 3.5-8.8 3.5L160 86.6l-3.5-8.8-8.8-3.5 8.8-3.5z"/>
+              <text class="il-cap il-c" x="160" y="114">AGENT</text>
+              <path class="il-wire" d="M184 66 C205 40 214 34 228 34"/><path class="il-wire" d="M184 75 C205 75 214 75 228 75"/><path class="il-wire" d="M184 84 C205 110 214 116 228 116"/>
+              <rect class="il-pill" x="228" y="22" width="82" height="24" rx="12"/><text class="il-pt" x="269" y="38">MCP tools</text>
+              <rect class="il-pill" x="228" y="63" width="82" height="24" rx="12"/><text class="il-pt" x="269" y="79">Grounding</text>
+              <rect class="il-pill il-pill-ok" x="228" y="104" width="82" height="24" rx="12"/><text class="il-pt" x="269" y="120">Action</text>
+            </svg>
+          )}
+          {a.logo === 'power-platform' && (
+            <svg viewBox="0 0 320 150">
+              <rect class="il-panel" x="24" y="10" width="112" height="132" rx="12"/>
+              <rect class="il-bar" x="24" y="10" width="112" height="22" rx="12"/><rect class="il-bar" x="24" y="22" width="112" height="10"/>
+              <text class="il-cap" x="36" y="25">REQUEST</text>
+              <rect class="il-field" x="36" y="42" width="88" height="14" rx="4"/><rect class="il-field" x="36" y="62" width="88" height="14" rx="4"/>
+              <rect class="il-chip-ok" x="36" y="86" width="56" height="16" rx="8"/><text class="il-ct" x="64" y="97">Approved</text>
+              <rect class="il-chip-wait" x="36" y="108" width="56" height="16" rx="8"/><text class="il-ct" x="64" y="119">Pending</text>
+              <path class="il-wire il-flow" d="M136 76 C170 76 176 76 196 76"/>
+              <circle class="il-node" cx="206" cy="76" r="10"/><path class="il-arrow" d="M202 72l6 4-6 4"/>
+              <path class="il-wire il-flow" d="M216 76 C228 76 230 76 238 76"/>
+              <rect class="il-panel" x="238" y="40" width="72" height="72" rx="10"/>
+              <rect class="il-grid" x="248" y="52" width="52" height="10" rx="2"/><rect class="il-grid" x="248" y="68" width="52" height="10" rx="2"/><rect class="il-grid" x="248" y="84" width="52" height="10" rx="2"/>
+              <text class="il-cap il-c" x="274" y="128">DATAVERSE</text>
+            </svg>
+          )}
+          {a.logo === 'azure' && (
+            <svg viewBox="0 0 320 150">
+              <path class="il-wire" d="M160 75 L70 34"/><path class="il-wire" d="M160 75 L70 116"/><path class="il-wire" d="M160 75 L250 34"/><path class="il-wire" d="M160 75 L250 116"/>
+              <polygon class="il-hub" points="160,47 184,61 184,89 160,103 136,89 136,61"/>
+              <text class="il-pt il-strong" x="160" y="79">API</text>
+              <path class="il-shield" d="M160 112l9 3.5v6c0 5.5-4 9.5-9 11-5-1.5-9-5.5-9-11v-6z"/>
+              <text class="il-cap il-c" x="160" y="146">ENTRA ID</text>
+              <rect class="il-pill" x="14" y="22" width="92" height="24" rx="12"/><text class="il-pt" x="60" y="38">Logic Apps</text>
+              <rect class="il-pill" x="14" y="104" width="92" height="24" rx="12"/><text class="il-pt" x="60" y="120">Functions</text>
+              <rect class="il-pill" x="214" y="22" width="92" height="24" rx="12"/><text class="il-pt" x="260" y="38">Azure SQL</text>
+              <rect class="il-pill" x="214" y="104" width="92" height="24" rx="12"/><text class="il-pt" x="260" y="120">Databricks</text>
+            </svg>
+          )}
+        </div>
         <div class="xp-head">
           <span class="xp-main-logo"><img src={logo(a.logo)} alt="" width="40" height="40" loading="lazy" /></span>
           <div><span class="tiny-label">{a.label}</span><h3>{a.title}</h3></div>
@@ -66,5 +117,11 @@ const areas = [
         </ul>
       </article>
     ))}
+  </div>
+  <div class="tech-strip">
+    <p class="tech-strip-title">Platforms &amp; technology I work with</p>
+    <ul>
+      {tech.map(([name, l]) => <li><img src={logo(l)} alt="" width="28" height="28" loading="lazy" /><span>{name}</span></li>)}
+    </ul>
   </div>
 </div></section>

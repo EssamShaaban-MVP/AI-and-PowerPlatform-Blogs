@@ -7,6 +7,9 @@ export default defineConfig({
   site: process.env.SITE_URL || 'https://example.github.io',
   base: process.env.BASE_PATH || '/',
   integrations: [sitemap()],
+  // three.js (~185 KB gzip) is only loaded on demand by the About-section robot (dynamic import),
+  // so its large chunk never blocks page load; raise the warning threshold accordingly.
+  vite: { build: { chunkSizeWarningLimit: 800 } },
   markdown: {
     // Dual syntax themes: dark is applied inline (unchanged default); light colours are exposed
     // as --shiki-light variables and switched on by [data-theme="light"] in global.css.

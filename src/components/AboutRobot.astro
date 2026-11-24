@@ -1,0 +1,643 @@
+---
+// Decorative 3D robot team (Three.js / WebGL) in the About section.
+// - Three modern robots pass a glowing data cube along: dispenser → Bolt → Nova → Pixel → live dashboard monitor.
+// - The monitor shows a canvas-rendered dashboard (simulated demo data) that updates with every delivery.
+// - Hover, tap or keyboard-focus a robot: the team stops, looks at you, and that robot shares a tip or a joke
+//   (shuffled deck: every interaction shows a different line until all have been seen).
+// - Three.js is loaded lazily when the section approaches the viewport; rendering pauses off-screen.
+// - prefers-reduced-motion: a still scene (tips/jokes still work); hidden if WebGL is unavailable.
+const team = [
+  { name: 'Bolt', role: 'Data dispatcher' },
+  { name: 'Nova', role: 'Orchestrator' },
+  { name: 'Pixel', role: 'Deployer' },
+];
+---
+<div class="about-robot" data-team={JSON.stringify(team)}>
+  <canvas aria-hidden="true"></canvas>
+  {team.map((r, i) => (
+    <button class="rb-hit" type="button" data-index={i} aria-label={`Ask ${r.name} the robot for a tip or a joke`}></button>
+  ))}
+  <div class="rb-bubble" role="status" aria-live="polite" hidden><strong></strong><span></span></div>
+</div>
+
+<script>
+  import type * as T from 'three';
+
+  const JOKES = [
+    'Why did the AI agent cross the road? It was grounded on the other side.',
+    "I'm not lazy. I'm running in low-power mode.",
+    'Dataverse and I have a one-to-many relationship. With snacks.',
+    "There are 10 kinds of robots: those who get binary and those who don't.",
+    'My Power Automate flow and I have a lot in common. We only work when triggered.',
+    'I asked Copilot for a joke. It gave me three options and a summary.',
+    "Why don't robots panic? Built-in retry policy.",
+    "I'd tell you a UDP joke, but you might not get it.",
+    "We're a great team. Low-code, high-five!",
+    "Our sprint had zero bugs. We just haven't found them yet.",
+  ];
+  const ADVICE = [
+    'Start with the problem, not the tool.',
+    'Secure it first. Least privilege beats clever code.',
+    'Automate the boring parts, then document them.',
+    'Ship small, learn fast, improve often.',
+    'Ground your AI in good data. Garbage in, confident garbage out.',
+    'Name things clearly. Future you will say thanks.',
+    'Design for the people using it, not the org chart.',
+    'Measure what matters before you optimise.',
+    'Every great solution started as a simple prototype.',
+    "Ask 'who will maintain this?' before you build it.",
+    'Keep learning. One Microsoft Learn module a week adds up.',
+    'Good governance is a feature, not a blocker.',
+    "Test the unhappy path. That's where real users live.",
+    'Write it down. The best architecture is a shared one.',
+    'Take breaks. Even robots need to recharge.',
+  ];
+  type Line = { kind: 'Tip' | 'Joke'; text: string };
+  const ALL: Line[] = [...ADVICE.map(text => ({ kind: 'Tip' as const, text })), ...JOKES.map(text => ({ kind: 'Joke' as const, text }))];
+  let deck: Line[] = [];
+  let lastLine: Line | null = null;
+  const nextLine = (): Line => {
+    if (!deck.length) {
+      deck = [...ALL];
+      for (let i = deck.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [deck[i], deck[j]] = [deck[j], deck[i]]; }
+      if (lastLine && deck[deck.length - 1] === lastLine) deck.unshift(deck.pop()!);
+    }
+    lastLine = deck.pop()!;
+    return lastLine;
+  };
+
+  const host = document.querySelector<HTMLElement>('.about-robot');
+  if (host) {
+    const team: { name: string; role: string }[] = JSON.parse(host.dataset.team || '[]');
+    const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const bubble = host.querySelector<HTMLElement>('.rb-bubble')!;
+    const hits = [...host.querySelectorAll<HTMLButtonElement>('.rb-hit')];
+    let started = false, visible = false;
+
+    const io = new IntersectionObserver(([e]) => {
+      visible = e.isIntersecting;
+      if (visible && !started) { started = true; init().catch(() => { host.hidden = true; }); }
+    }, { rootMargin: '300px 0px' });
+    io.observe(host);
+
+    async function init() {
+      const THREE = await import('three');
+      const { RoundedBoxGeometry } = await import('three/examples/jsm/geometries/RoundedBoxGeometry.js');
+      const { RoomEnvironment } = await import('three/examples/jsm/environments/RoomEnvironment.js');
+      const canvas = host!.querySelector('canvas')!;
+
+      let renderer: T.WebGLRenderer;
+      try { renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'low-power' }); }
+      catch { host!.hidden = true; return; }
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.outputColorSpace = THREE.SRGBColorSpace;
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.0;
+
+      const scene = new THREE.Scene();
+      const pmrem = new THREE.PMREMGenerator(renderer);
+      scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture; // studio reflections
+
+      const camera = new THREE.PerspectiveCamera(26, 1, 0.1, 100);
+      camera.position.set(0, 2.7, 12.5);
+      camera.lookAt(0, 1.55, 0);
+      scene.add(new THREE.HemisphereLight(0xe6f1ff, 0x22324f, 0.6));
+      const key = new THREE.DirectionalLight(0xffffff, 1.6); key.position.set(3.5, 6, 6); scene.add(key);
+      const rim = new THREE.DirectionalLight(0x4cc8ff, 1.4); rim.position.set(-5, 3, -4); scene.add(rim);
+
+      // Shared materials: pearl clear-coat shell, graphite metal, dark glass, brushed aluminium
+      const shell = new THREE.MeshPhysicalMaterial({ color: 0xf5f8fc, roughness: 0.2, metalness: 0, clearcoat: 1, clearcoatRoughness: 0.06, iridescence: 0.18, iridescenceIOR: 1.3, sheen: 0.25, sheenColor: new THREE.Color(0xbfe3ff) });
+      const graphite = new THREE.MeshPhysicalMaterial({ color: 0x1c2532, roughness: 0.32, metalness: 0.75, clearcoat: 0.4, clearcoatRoughness: 0.3 });
+      const glass = new THREE.MeshPhysicalMaterial({ color: 0x050b16, roughness: 0.04, metalness: 0.2, clearcoat: 1, clearcoatRoughness: 0.02 });
+      const alu = new THREE.MeshPhysicalMaterial({ color: 0xc9d2dd, roughness: 0.28, metalness: 1 });
+
+      // Soft contact shadow texture
+      const sc = document.createElement('canvas'); sc.width = sc.height = 128;
+      const sx = sc.getContext('2d')!; const sg = sx.createRadialGradient(64, 64, 4, 64, 64, 64);
+      sg.addColorStop(0, 'rgba(6,18,45,0.42)'); sg.addColorStop(1, 'rgba(6,18,45,0)'); sx.fillStyle = sg; sx.fillRect(0, 0, 128, 128);
+      const shadowMat = new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(sc), transparent: true, depthWrite: false });
+      const contactShadow = (w: number, dd: number) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(w, dd), shadowMat); m.rotation.x = -Math.PI / 2; m.position.y = 0.01; return m; };
+
+      // Screen face: a canvas drawn as the emissive map of the curved visor, so the eyes glow on the dark glass.
+      type Face = 'idle' | 'blink' | 'happy';
+      function makeFace(color: string) {
+        const c = document.createElement('canvas'); c.width = 384; c.height = 208;
+        const ctx = c.getContext('2d')!;
+        const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace;
+        let current: Face | null = null;
+        const draw = (mode: Face) => {
+          if (mode === current) return; current = mode;
+          ctx.fillStyle = '#000'; ctx.fillRect(0, 0, 384, 208);           // black = no emission
+          ctx.fillStyle = color; ctx.strokeStyle = color; ctx.shadowColor = color; ctx.shadowBlur = 28; ctx.lineCap = 'round';
+          const eyes = [132, 252];
+          if (mode === 'blink') { ctx.lineWidth = 12; eyes.forEach(x => { ctx.beginPath(); ctx.moveTo(x - 24, 98); ctx.lineTo(x + 24, 98); ctx.stroke(); }); }
+          else if (mode === 'happy') { ctx.lineWidth = 14; eyes.forEach(x => { ctx.beginPath(); ctx.arc(x, 112, 27, Math.PI * 1.15, Math.PI * 1.85); ctx.stroke(); }); }
+          else { eyes.forEach(x => { ctx.beginPath(); ctx.ellipse(x, 96, 27, 30, 0, 0, Math.PI * 2); ctx.fill(); }); }
+          // small smile under the eyes (wider when happy)
+          ctx.lineWidth = 9; ctx.beginPath();
+          if (mode === 'happy') ctx.arc(192, 128, 26, Math.PI * 0.18, Math.PI * 0.82); else ctx.arc(192, 120, 16, Math.PI * 0.25, Math.PI * 0.75);
+          ctx.stroke();
+          tex.needsUpdate = true;
+        };
+        draw('idle');
+        return { tex, draw };
+      }
+
+      // Rounded alpha mask so the visor reads as a soft, pill-shaped screen
+      const roundedMask = (inset: number, radius: number) => {
+        const c = document.createElement('canvas'); c.width = 384; c.height = 208;
+        const x = c.getContext('2d')!; x.fillStyle = '#000'; x.fillRect(0, 0, 384, 208);
+        x.fillStyle = '#fff'; x.beginPath(); x.roundRect(inset, inset, 384 - inset * 2, 208 - inset * 2, radius); x.fill();
+        return new THREE.CanvasTexture(c);
+      };
+      const visorMask = roundedMask(4, 80), rimMask = roundedMask(2, 86);
+
+      // Squircle (superellipsoid) helmet: deform a sphere so the head is a soft rounded cube, with exact normals.
+      const HX = 0.92, HY = 0.76, HZ = 0.8, HN = 3.2;
+      const squircle = (geo: T.BufferGeometry) => {
+        const pos = geo.attributes.position, nor = geo.attributes.normal, v = new THREE.Vector3(), n = new THREE.Vector3();
+        for (let i = 0; i < pos.count; i++) {
+          v.fromBufferAttribute(pos, i); const r = v.length(); if (!r) continue; v.divideScalar(r);
+          const k = Math.pow(Math.abs(v.x) ** HN + Math.abs(v.y) ** HN + Math.abs(v.z) ** HN, 1 / HN);
+          v.multiplyScalar(r / k); v.set(v.x * HX, v.y * HY, v.z * HZ); pos.setXYZ(i, v.x, v.y, v.z);
+          const g = (c: number, ax: number) => Math.sign(c) * Math.abs(c / ax) ** (HN - 1) / ax;
+          n.set(g(v.x, HX), g(v.y, HY), g(v.z, HZ)).normalize(); nor.setXYZ(i, n.x, n.y, n.z);
+        }
+        pos.needsUpdate = true; nor.needsUpdate = true; return geo;
+      };
+
+      type Robot = {
+        root: T.Group; body: T.Group; head: T.Group; grip: T.Object3D; arms: T.Group[]; elbows: T.Group[]; legs: T.Group[]; knees: T.Group[];
+        accent: T.MeshStandardMaterial; tip: T.MeshStandardMaterial; face: ReturnType<typeof makeFace>;
+        yaw: number; nextBlink: number; holding: number;
+        hands: T.Group[]; reach: number; recoil: number; throwT: number;
+      };
+      const chrome = new THREE.MeshPhysicalMaterial({ color: 0x9aa7b8, roughness: 0.18, metalness: 1, clearcoat: 0.6 });
+      const darkJoint = new THREE.MeshPhysicalMaterial({ color: 0x1a2230, roughness: 0.3, metalness: 0.4, clearcoat: 0.8, clearcoatRoughness: 0.1 });
+      const cap = (r: number, l: number) => new THREE.CapsuleGeometry(r, l, 8, 18);
+      const ball = (r: number) => new THREE.SphereGeometry(r, 24, 18);
+      // short, round egg body (lathe)
+      const torsoGeo = new THREE.LatheGeometry([
+        [0, 0], [0.22, 0.01], [0.33, 0.08], [0.41, 0.25], [0.43, 0.46], [0.41, 0.66], [0.34, 0.84], [0.22, 0.96], [0.1, 1.0], [0, 1.0],
+      ].map(([x, y]) => new THREE.Vector2(x, y)), 48);
+
+      type Look = 'antenna' | 'cat' | 'headset';
+      function makeRobot(accentHex: number, accentCss: string, look: Look): Robot {
+        const accent = new THREE.MeshStandardMaterial({ color: accentHex, emissive: accentHex, emissiveIntensity: 2.4, toneMapped: false });
+        const tip = accent.clone();
+        const root = new THREE.Group(); const body = new THREE.Group(); root.add(body);
+
+        // body: small glossy egg, dark belly band with a glowing light, glowing chest chevron
+        const torso = new THREE.Mesh(torsoGeo, shell); torso.scale.set(0.9, 0.85, 0.82); torso.position.y = 0.58; body.add(torso);
+        const belt = new THREE.Mesh(new THREE.TorusGeometry(0.355, 0.05, 12, 56), darkJoint); belt.rotation.x = Math.PI / 2; belt.scale.set(1, 0.82, 1); belt.position.y = 0.8; body.add(belt);
+        const beltLight = new THREE.Mesh(new RoundedBoxGeometry(0.2, 0.035, 0.04, 2, 0.017), accent); beltLight.position.set(0, 0.8, 0.325); body.add(beltLight);
+        [-1, 1].forEach(sd => { const v = new THREE.Mesh(new RoundedBoxGeometry(0.13, 0.035, 0.03, 2, 0.015), accent); v.position.set(sd * 0.05, 1.14, 0.3); v.rotation.set(-0.35, 0, sd * 0.55); body.add(v); });
+        const pelvis = new THREE.Mesh(ball(0.26), shell); pelvis.scale.set(1.1, 0.55, 0.9); pelvis.position.y = 0.6; body.add(pelvis);
+        const collar = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.2, 0.12, 28), darkJoint); collar.position.y = 1.46; body.add(collar);
+
+        // head: big squircle helmet with a dark wrap-around screen
+        const head = new THREE.Group(); head.position.y = 1.5; body.add(head);
+        const HC = 0.78;                                                         // helmet centre above the neck
+        const skull = new THREE.Mesh(squircle(new THREE.SphereGeometry(1, 72, 56)), shell); skull.position.y = HC; head.add(skull);
+        const seg = (r: number, w: number, h: number, mat: T.Material) => {
+          const m = new THREE.Mesh(squircle(new THREE.SphereGeometry(r, 72, 44, Math.PI / 2 - w / 2, w, Math.PI / 2 - h * 0.52, h)), mat);
+          m.position.y = HC; return m;
+        };
+        head.add(seg(1.006, 2.08, 1.36, new THREE.MeshPhysicalMaterial({ color: 0x1a2230, roughness: 0.3, metalness: 0.4, clearcoat: 0.8, alphaMap: rimMask, alphaTest: 0.5 }))); // screen bezel
+        const face = makeFace(accentCss);
+        const visorMat = new THREE.MeshPhysicalMaterial({ color: 0x03060c, roughness: 0.05, metalness: 0.2, clearcoat: 1, clearcoatRoughness: 0.02, emissive: 0xffffff, emissiveMap: face.tex, emissiveIntensity: 2.6, alphaMap: visorMask, alphaTest: 0.5 });
+        head.add(seg(1.012, 1.96, 1.24, visorMat));                              // glossy black screen with glowing eyes
+        const shine = new THREE.Mesh(squircle(new THREE.SphereGeometry(1.02, 48, 16, Math.PI / 2 - 0.75, 0.55, Math.PI / 2 - 0.55, 0.16)),
+          new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.2, depthWrite: false }));
+        shine.position.y = HC; head.add(shine);                                  // soft reflection on the screen
+        // headphone ear pods: dark housing, white cap, glowing ring
+        [-1, 1].forEach(sd => {
+          const pod = new THREE.Group(); pod.position.set(sd * 0.9, HC - 0.02, -0.02); pod.rotation.z = Math.PI / 2; head.add(pod);
+          pod.add(new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.3, 0.16, 44), darkJoint));
+          const capM = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.22, 0.08, 44), shell); capM.position.y = -sd * 0.1; pod.add(capM);
+          const ring = new THREE.Mesh(new THREE.TorusGeometry(0.245, 0.016, 8, 44), accent); ring.rotation.x = Math.PI / 2; ring.position.y = -sd * 0.085; pod.add(ring);
+        });
+        // personality: Bolt has antennas, Nova cat ears, Pixel a headset band
+        if (look === 'antenna') {
+          [-1, 1].forEach(sd => {
+            const ant = new THREE.Group(); ant.position.set(sd * 0.86, HC + 0.1, -0.02); ant.rotation.z = -sd * 0.12; head.add(ant);
+            const rod = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.022, 0.62, 12), chrome); rod.position.y = 0.42; ant.add(rod);
+            const bulb = new THREE.Mesh(ball(0.055), tip); bulb.position.y = 0.76; ant.add(bulb);
+          });
+        } else if (look === 'cat') {
+          [-1, 1].forEach(sd => {
+            const ear = new THREE.Group(); ear.position.set(sd * 0.52, HC + 0.66, -0.05); ear.rotation.z = -sd * 0.42; head.add(ear);
+            const outer = new THREE.Mesh(new THREE.ConeGeometry(0.27, 0.5, 32), shell); outer.scale.z = 0.55; outer.position.y = 0.2; ear.add(outer);
+            const inner = new THREE.Mesh(new THREE.ConeGeometry(0.16, 0.32, 24), tip); inner.scale.z = 0.4; inner.position.set(0, 0.16, 0.08); ear.add(inner);
+          });
+        } else {
+          const band = new THREE.Mesh(new THREE.TorusGeometry(0.95, 0.055, 14, 64, Math.PI), darkJoint); band.scale.y = 0.86; band.position.set(0, HC, -0.05); head.add(band);
+          const bandLight = new THREE.Mesh(new THREE.TorusGeometry(0.95, 0.018, 8, 48, Math.PI * 0.22), tip); bandLight.scale.y = 0.86; bandLight.rotation.z = Math.PI * 0.39; bandLight.position.set(0, HC, 0.0); head.add(bandLight);
+        }
+
+        // stubby arms: shoulder, chunky upper arm, elbow, forearm with glowing cuff, dark mitten hand
+        const elbows: T.Group[] = [];
+        const hands: T.Group[] = [];
+        const arms = [-1, 1].map(sd => {
+          const sh = new THREE.Group(); sh.position.set(sd * 0.44, 1.3, 0); body.add(sh);
+          sh.add(new THREE.Mesh(ball(0.12), darkJoint));
+          const upper = new THREE.Mesh(cap(0.095, 0.12), shell); upper.position.y = -0.13; sh.add(upper);
+          const elbow = new THREE.Group(); elbow.position.y = -0.28; sh.add(elbow); elbows.push(elbow);
+          elbow.add(new THREE.Mesh(ball(0.085), darkJoint));
+          const fore = new THREE.Mesh(cap(0.115, 0.12), shell); fore.position.y = -0.14; elbow.add(fore);
+          const cuff = new THREE.Mesh(new THREE.TorusGeometry(0.1, 0.016, 8, 28), accent); cuff.rotation.x = Math.PI / 2; cuff.position.y = -0.26; elbow.add(cuff);
+          const hand = new THREE.Group(); hand.position.y = -0.36; elbow.add(hand); hands.push(hand);
+          hand.add(new THREE.Mesh(new RoundedBoxGeometry(0.19, 0.17, 0.15, 3, 0.065), darkJoint));
+          const thumb = new THREE.Mesh(cap(0.035, 0.05), darkJoint); thumb.position.set(-sd * 0.1, 0.0, 0.04); thumb.rotation.z = sd * 0.7; hand.add(thumb);
+          return sh;
+        });
+
+        // short legs with big rounded boots
+        const knees: T.Group[] = [];
+        const legs = [-1, 1].map(sd => {
+          const hip = new THREE.Group(); hip.position.set(sd * 0.19, 0.55, 0); root.add(hip);
+          hip.add(new THREE.Mesh(ball(0.1), darkJoint));
+          const thigh = new THREE.Mesh(cap(0.105, 0.06), shell); thigh.position.y = -0.1; hip.add(thigh);
+          const knee = new THREE.Group(); knee.position.y = -0.22; hip.add(knee); knees.push(knee);
+          knee.add(new THREE.Mesh(ball(0.085), darkJoint));
+          const shin = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.14, 0.14, 28), shell); shin.position.y = -0.08; knee.add(shin);
+          const boot = new THREE.Mesh(new RoundedBoxGeometry(0.32, 0.2, 0.44, 4, 0.09), shell); boot.position.set(0, -0.22, 0.05); knee.add(boot);
+          const sole = new THREE.Mesh(new RoundedBoxGeometry(0.33, 0.05, 0.45, 3, 0.022), darkJoint); sole.position.set(0, -0.305, 0.05); knee.add(sole);
+          return hip;
+        });
+
+        const grip = new THREE.Object3D(); grip.position.set(0, 1.0, 0.6); body.add(grip);
+        root.add(contactShadow(2.0, 1.15));
+        return { root, body, head, grip, arms, elbows, legs, knees, accent, tip, face, yaw: 0, nextBlink: 1 + Math.random() * 3, holding: 0, hands, reach: 0, recoil: 0, throwT: 0 };
+      }
+
+      const world = new THREE.Group(); scene.add(world);
+      const robots = [makeRobot(0x4cc8ff, '#7fdcff', 'antenna'), makeRobot(0xa38aff, '#c4b5ff', 'cat'), makeRobot(0x3ad6c4, '#7ff0e2', 'headset')];
+      robots.forEach(r => world.add(r.root));
+
+      // ---- Raw data source: a tangled, chaotic cloud of mixed records above a hex platform ----
+      const pedestal = new THREE.Group(); world.add(pedestal);
+      const RAW = 0xff7a59;
+      const plat = new THREE.Mesh(new THREE.CylinderGeometry(0.62, 0.7, 0.16, 6), graphite); plat.position.y = 0.08; pedestal.add(plat);
+      const platTop = new THREE.Mesh(new THREE.CylinderGeometry(0.6, 0.6, 0.02, 6), glass); platTop.position.y = 0.17; pedestal.add(platTop);
+      const platGlow = new THREE.Mesh(new THREE.TorusGeometry(0.61, 0.018, 8, 6), new THREE.MeshStandardMaterial({ color: RAW, emissive: RAW, emissiveIntensity: 2.4, toneMapped: false }));
+      platGlow.rotation.set(Math.PI / 2, 0, Math.PI / 2); platGlow.position.y = 0.17; pedestal.add(platGlow);
+      const CL = 1.8;                                                            // cloud centre height
+      const chaos = new THREE.Group(); chaos.position.y = CL; chaos.scale.setScalar(1.6); pedestal.add(chaos);
+      // light cone from the platform up into the cloud
+      const beamMat = new THREE.MeshBasicMaterial({ color: RAW, transparent: true, opacity: 0.1, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide });
+      const beam = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.56, CL - 0.2, 6, 1, true), beamMat); beam.position.y = (CL + 0.2) / 2 - 0.0; pedestal.add(beam);
+      // glowing core
+      const coreMat = new THREE.MeshBasicMaterial({ color: RAW, transparent: true, opacity: 0.3, depthWrite: false, toneMapped: false });
+      const core = new THREE.Mesh(new THREE.SphereGeometry(0.26, 24, 16), coreMat); chaos.add(core);
+      // ~100 mismatched records orbiting on random axes (instanced)
+      const NB = 100, bitPalette = [0xff7a59, 0xffc857, 0xff5c8a, 0x4cc8ff, 0xa38aff, 0x9aa7b8, 0x3ad6c4];
+      const bits = new THREE.InstancedMesh(new RoundedBoxGeometry(0.1, 0.1, 0.1, 1, 0.022), new THREE.MeshStandardMaterial({ roughness: 0.35, metalness: 0.1, emissive: 0x2a1610, emissiveIntensity: 1 }), NB);
+      const bitInfo = Array.from({ length: NB }, (_, i) => {
+        const axis = new THREE.Vector3(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5).normalize();
+        const u = new THREE.Vector3(1, 0, 0).cross(axis); if (u.lengthSq() < 0.01) u.set(0, 1, 0).cross(axis); u.normalize();
+        const v = axis.clone().cross(u);
+        bits.setColorAt(i, new THREE.Color(bitPalette[i % bitPalette.length]));
+        return { u, v, r: 0.2 + Math.random() * 0.55, speed: (0.4 + Math.random() * 1.4) * (Math.random() < 0.5 ? -1 : 1), ph: Math.random() * Math.PI * 2,
+          sc: new THREE.Vector3(0.5 + Math.random() * 1.3, 0.4 + Math.random() * 1.0, 0.5 + Math.random() * 1.2), spin: Math.random() * 3 };
+      });
+      chaos.add(bits);
+      // tangled data streams
+      const tangles: T.Mesh[] = [];
+      [0xff7a59, 0xffc857, 0xff5c8a, 0xa38aff, 0x4cc8ff].forEach(col => {
+        const pts = Array.from({ length: 9 }, () => new THREE.Vector3(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5).normalize().multiplyScalar(0.3 + Math.random() * 0.38));
+        const line = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts, true), 160, 0.011, 6, true),
+          new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0.85, toneMapped: false }));
+        line.rotation.set(Math.random() * 3, Math.random() * 3, 0); chaos.add(line); tangles.push(line);
+      });
+      pedestal.add(contactShadow(2.1, 1.3));
+      let gather = 0;                                                            // records pull together while a cube forms
+      const bitDummy = new THREE.Object3D();
+      const animateChaos = (dt: number) => {
+        bitInfo.forEach((bi, i) => {
+          const ang = bi.ph + t * bi.speed, r = bi.r * (1 - gather * 0.5) + Math.sin(t * 5 + i) * 0.015;
+          bitDummy.position.copy(bi.u).multiplyScalar(Math.cos(ang) * r).addScaledVector(bi.v, Math.sin(ang) * r);
+          bitDummy.rotation.set(t * bi.spin + i, t * bi.spin * 0.7, i);
+          bitDummy.scale.copy(bi.sc);
+          bitDummy.updateMatrix(); bits.setMatrixAt(i, bitDummy.matrix);
+        });
+        bits.instanceMatrix.needsUpdate = true;
+        tangles.forEach((l, i) => { l.rotation.y += dt * (0.25 + i * 0.12) * (i % 2 ? -1 : 1); l.rotation.x += dt * 0.15 * (i % 3 ? 1 : -1); });
+        chaos.rotation.y += dt * 0.3;
+        coreMat.opacity = 0.22 + gather * 0.35 + Math.sin(t * 4) * 0.06;
+        beamMat.opacity = 0.05 + Math.sin(t * 3) * 0.02;
+      };
+
+      // ---- Dashboard monitor with a live canvas UI (simulated demo data) ----
+      const monitor = new THREE.Group(); world.add(monitor);
+      const MW = 2.3, MH = 1.44;
+      const bezel = new THREE.Mesh(new RoundedBoxGeometry(MW + 0.1, MH + 0.1, 0.08, 4, 0.05), graphite); bezel.position.y = 1.75; monitor.add(bezel);
+      const neckM = new THREE.Mesh(new RoundedBoxGeometry(0.14, 1.02, 0.06, 2, 0.03), alu); neckM.position.set(0, 0.55, -0.06); monitor.add(neckM);
+      const base = new THREE.Mesh(new RoundedBoxGeometry(0.9, 0.05, 0.5, 4, 0.025), alu); base.position.set(0, 0.03, 0); monitor.add(base);
+      monitor.add(contactShadow(2.6, 1.2));
+      const DW = 1024, DH = 640;
+      const dc = document.createElement('canvas'); dc.width = DW; dc.height = DH;
+      const d = dc.getContext('2d')!;
+      const dashTex = new THREE.CanvasTexture(dc); dashTex.colorSpace = THREE.SRGBColorSpace; dashTex.anisotropy = 4;
+      const screenMesh = new THREE.Mesh(new THREE.PlaneGeometry(MW, MH), new THREE.MeshBasicMaterial({ map: dashTex, toneMapped: false }));
+      screenMesh.position.set(0, 1.75, 0.045); monitor.add(screenMesh);
+      const glare = new THREE.Mesh(new THREE.PlaneGeometry(MW, MH), new THREE.MeshPhysicalMaterial({ color: 0xffffff, transparent: true, opacity: 0.06, roughness: 0.05, metalness: 0, clearcoat: 1 }));
+      glare.position.set(0, 1.75, 0.05); monitor.add(glare);
+      monitor.rotation.y = -0.38; pedestal.rotation.y = 0.3;
+
+      const font = (w: number, s: number) => `${w} ${s}px 'Urbanist Variable', 'Segoe UI', system-ui, sans-serif`;
+      const dash = { quality: 61.4, packets: 0, perRobot: [0, 0, 0], history: Array.from({ length: 28 }, (_, i) => 3 + Math.sin(i / 3) * 1.5 + Math.random()), bucket: 0, log: [] as string[], latency: 142 };
+      const clock = () => new Date().toLocaleTimeString('en-GB', { hour12: false });
+      const card = (x: number, y: number, w: number, h: number) => { d.fillStyle = '#10223d'; d.strokeStyle = '#1f3d63'; d.lineWidth = 2; d.beginPath(); d.roundRect(x, y, w, h, 16); d.fill(); d.stroke(); };
+      function drawDashboard() {
+        const bg = d.createLinearGradient(0, 0, DW, DH); bg.addColorStop(0, '#071426'); bg.addColorStop(1, '#0b1d36');
+        d.fillStyle = bg; d.fillRect(0, 0, DW, DH);
+        d.textBaseline = 'middle'; d.textAlign = 'left';
+        // header
+        d.fillStyle = '#e8f2ff'; d.font = font(700, 34); d.fillText('Clean data pipeline', 36, 44);
+        d.fillStyle = '#7f97b1'; d.font = font(600, 18); d.fillText('DEMO · SIMULATED', 352, 46);
+        d.fillStyle = '#0f3b2f'; d.beginPath(); d.roundRect(DW - 250, 26, 92, 36, 18); d.fill();
+        d.fillStyle = '#3ddc97'; d.beginPath(); d.arc(DW - 230, 44, 6, 0, Math.PI * 2); d.fill(); d.font = font(700, 18); d.fillText('LIVE', DW - 216, 45);
+        d.fillStyle = '#a9bace'; d.font = font(600, 20); d.fillText(clock(), DW - 140, 45);
+        // KPI cards
+        const kpis: [string, string, string][] = [['Clean records', (dash.packets * 1250).toLocaleString('en-US'), '#7fdcff'], ['Data quality', `${dash.quality.toFixed(1)}%`, '#3ddc97'], ['Avg latency', `${dash.latency} ms`, '#c4b5ff']];
+        kpis.forEach(([label, value, color], i) => {
+          const x = 36 + i * 326; card(x, 86, 302, 118);
+          d.fillStyle = '#8fb0cc'; d.font = font(600, 18); d.fillText(label, x + 22, 116);
+          d.fillStyle = color; d.font = font(800, 46); d.fillText(value, x + 22, 166);
+        });
+        // throughput chart
+        card(36, 226, 604, 250);
+        d.fillStyle = '#e8f2ff'; d.font = font(700, 20); d.fillText('Throughput', 58, 256);
+        const cx = 58, cy = 286, cw = 560, ch = 170, max = Math.max(8, ...dash.history);
+        d.strokeStyle = '#1d3555'; d.lineWidth = 1; for (let i = 0; i <= 3; i++) { const y = cy + (ch / 3) * i; d.beginPath(); d.moveTo(cx, y); d.lineTo(cx + cw, y); d.stroke(); }
+        const pts = dash.history.map((v, i) => [cx + (cw / (dash.history.length - 1)) * i, cy + ch - (v / max) * ch] as const);
+        const area = d.createLinearGradient(0, cy, 0, cy + ch); area.addColorStop(0, 'rgba(76,200,255,0.35)'); area.addColorStop(1, 'rgba(76,200,255,0)');
+        d.beginPath(); d.moveTo(pts[0][0], cy + ch); pts.forEach(([x, y]) => d.lineTo(x, y)); d.lineTo(pts[pts.length - 1][0], cy + ch); d.closePath(); d.fillStyle = area; d.fill();
+        d.beginPath(); pts.forEach(([x, y], i) => (i ? d.lineTo(x, y) : d.moveTo(x, y))); d.strokeStyle = '#4cc8ff'; d.lineWidth = 4; d.lineJoin = 'round'; d.stroke();
+        const [lx, ly] = pts[pts.length - 1]; d.fillStyle = '#bff4ff'; d.beginPath(); d.arc(lx, ly, 7, 0, Math.PI * 2); d.fill();
+        // per-robot bars
+        card(660, 226, 328, 250);
+        d.fillStyle = '#e8f2ff'; d.font = font(700, 20); d.fillText('By robot', 682, 256);
+        const names = ['Bolt · ingest', 'Nova · clean', 'Pixel · publish'], colors = ['#7fdcff', '#c4b5ff', '#7ff0e2'], bmax = Math.max(1, ...dash.perRobot);
+        names.forEach((n, i) => {
+          const y = 300 + i * 56;
+          d.fillStyle = '#a9bace'; d.font = font(600, 18); d.fillText(n, 682, y);
+          d.fillStyle = '#1a3150'; d.beginPath(); d.roundRect(682, y + 14, 280, 14, 7); d.fill();
+          d.fillStyle = colors[i]; d.beginPath(); d.roundRect(682, y + 14, Math.max(14, 280 * (dash.perRobot[i] / bmax)), 14, 7); d.fill();
+          d.fillStyle = '#e8f2ff'; d.font = font(700, 18); d.textAlign = 'right'; d.fillText(String(dash.perRobot[i]), 962, y); d.textAlign = 'left';
+        });
+        // activity log
+        card(36, 494, 952, 118);
+        d.fillStyle = '#e8f2ff'; d.font = font(700, 20); d.fillText('Activity', 58, 522);
+        const entries = dash.log.length ? dash.log : ['Waiting for the first batch…'];
+        entries.slice(0, 3).forEach((e, i) => {
+          const y = 556 + i * 26;
+          d.fillStyle = dash.log.length ? '#3ddc97' : '#7f97b1'; d.font = font(700, 18); d.fillText(dash.log.length ? '✓' : '•', 58, y);
+          d.fillStyle = '#c9d7e6'; d.font = font(500, 18); d.fillText(e, 84, y);
+        });
+        dashTex.needsUpdate = true;
+      }
+      drawDashboard();
+      document.fonts?.ready.then(drawDashboard);
+      let dashTimer = 0;
+
+      // The data cube
+      const cubeTex = (clean: boolean) => {
+        const c = document.createElement('canvas'); c.width = c.height = 128; const x = c.getContext('2d')!;
+        if (clean) {
+          x.fillStyle = '#1b6fa8'; x.fillRect(0, 0, 128, 128);
+          x.strokeStyle = '#bff4ff'; x.lineWidth = 3; for (let i = 1; i < 4; i++) { x.beginPath(); x.moveTo(i * 32, 14); x.lineTo(i * 32, 114); x.stroke(); x.beginPath(); x.moveTo(14, i * 32); x.lineTo(114, i * 32); x.stroke(); }
+          x.strokeStyle = '#ffffff'; x.lineWidth = 6; x.strokeRect(10, 10, 108, 108);
+        } else {
+          x.fillStyle = '#4a2418'; x.fillRect(0, 0, 128, 128);
+          const cols = ['#ff7a59', '#ffc857', '#ff5c8a', '#a38aff', '#7a8597', '#4cc8ff'];
+          for (let i = 0; i < 70; i++) { x.fillStyle = cols[i % cols.length]; x.globalAlpha = 0.5 + Math.random() * 0.5; x.fillRect(Math.random() * 120, Math.random() * 120, 4 + Math.random() * 22, 3 + Math.random() * 10); }
+          x.globalAlpha = 1;
+        }
+        const tx = new THREE.CanvasTexture(c); tx.colorSpace = THREE.SRGBColorSpace; return tx;
+      };
+      const rawTex = cubeTex(false), cleanTex = cubeTex(true);
+      const cubeMat = new THREE.MeshPhysicalMaterial({ color: 0xffffff, map: rawTex, emissive: 0xffffff, emissiveMap: rawTex, emissiveIntensity: 0.9, roughness: 0.15, metalness: 0.05, clearcoat: 1 });
+      const cube = new THREE.Mesh(new RoundedBoxGeometry(0.38, 0.38, 0.38, 4, 0.08), cubeMat);
+      world.add(cube);
+      let isClean = false;
+      const setClean = (c: boolean) => { if (c === isClean) return; isClean = c; cubeMat.map = cubeMat.emissiveMap = c ? cleanTex : rawTex; cubeMat.emissiveIntensity = c ? 1.3 : 0.9; };
+      // Nova's cleaning scanner: a glowing ring sweeping over the cube
+      const scanMat = new THREE.MeshBasicMaterial({ color: 0xc4b5ff, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false });
+      const scanner = new THREE.Mesh(new THREE.TorusGeometry(0.34, 0.018, 8, 48), scanMat); scanner.rotation.x = Math.PI / 2; world.add(scanner);
+
+      // ---- Layout (responsive) ----
+      let spacing = 3.1;
+      const layout = () => {
+        const w = host!.clientWidth, h = host!.clientHeight; if (!w || !h) return;
+        renderer.setSize(w, h, false);
+        camera.aspect = w / h; camera.updateProjectionMatrix();
+        const visibleW = 2 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * camera.position.z * camera.aspect;
+        spacing = Math.min(3.1, (visibleW - 0.4) / 5.4);
+        const s = Math.min(1, spacing / 3.1);
+        robots.forEach((r, i) => { r.root.position.x = (i - 1) * spacing; r.root.scale.setScalar(s * 1.15); });
+        pedestal.position.x = -spacing * 1.7; pedestal.scale.setScalar(s);
+        monitor.position.x = spacing * 2.2; monitor.scale.setScalar(s * 1.35);
+        cube.scale.setScalar(s * 1.15);
+        placeHits();
+      };
+      const proj = new THREE.Vector3();
+      const toScreen = (v: T.Vector3) => { proj.copy(v).project(camera); return { x: (proj.x + 1) / 2 * host!.clientWidth, y: (1 - proj.y) / 2 * host!.clientHeight }; };
+      function placeHits() {
+        robots.forEach((r, i) => {
+          const top = toScreen(r.root.localToWorld(new THREE.Vector3(0, 3.4, 0)));
+          const bot = toScreen(r.root.localToWorld(new THREE.Vector3(0, 0, 0)));
+          const hh = Math.max(40, bot.y - top.y), ww = hh * 0.55;
+          Object.assign(hits[i].style, { left: `${top.x - ww / 2}px`, top: `${top.y}px`, width: `${ww}px`, height: `${hh}px` });
+        });
+      }
+
+      // ---- Interaction ----
+      let selected = -1, attention = 0, hideTimer = 0, lastSelectAt = 0;
+      const pointer = { x: 0, y: 0, active: false };
+      host!.addEventListener('pointermove', e => {
+        const r = host!.getBoundingClientRect();
+        pointer.x = ((e.clientX - r.left) / r.width) * 2 - 1; pointer.y = -((e.clientY - r.top) / r.height) * 2 + 1; pointer.active = true;
+      });
+      host!.addEventListener('pointerleave', () => { pointer.active = false; });
+      const placeBubble = () => {
+        if (selected < 0) return;
+        const p = toScreen(robots[selected].root.localToWorld(new THREE.Vector3(0, 3.6, 0)));
+        const half = bubble.offsetWidth / 2 + 8;
+        const left = Math.min(Math.max(p.x, half), host!.clientWidth - half);
+        bubble.style.left = `${left}px`;
+        // keep the pointer arrow over the robot that is speaking
+        const arrow = Math.min(Math.max(p.x - (left - bubble.offsetWidth / 2), 18), bubble.offsetWidth - 18);
+        bubble.style.setProperty('--ax', `${arrow}px`);
+        bubble.style.top = `${Math.max(p.y, 70)}px`;
+      };
+      const select = (i: number) => {
+        window.clearTimeout(hideTimer);
+        const now = performance.now();
+        if (i === selected && now - lastSelectAt < 400) return; // one gesture can fire focus + pointerenter + click
+        lastSelectAt = now;
+        const line = nextLine();
+        selected = i;
+        bubble.querySelector('strong')!.textContent = `${team[i].name} · ${line.kind}:`;
+        bubble.querySelector('span')!.textContent = ` ${line.text}`;
+        bubble.hidden = false; placeBubble();
+        host!.classList.add('is-engaged');
+        robots.forEach((r, k) => r.face.draw(k === i ? 'happy' : 'idle'));
+        if (reduceMotion) render();
+      };
+      const release = () => {
+        window.clearTimeout(hideTimer);
+        hideTimer = window.setTimeout(() => { selected = -1; bubble.hidden = true; host!.classList.remove('is-engaged'); robots.forEach(r => r.face.draw('idle')); if (reduceMotion) render(); }, 2600);
+      };
+      hits.forEach((b, i) => {
+        b.addEventListener('pointerenter', () => select(i));
+        b.addEventListener('pointerleave', release);
+        b.addEventListener('focus', () => select(i));
+        b.addEventListener('blur', release);
+        b.addEventListener('click', () => select(i));
+      });
+
+      // ---- Work cycle ----
+      type Seg = { kind: 'spawn' | 'pick' | 'hold' | 'toss' | 'deliver'; from?: number; to?: number; dur: number };
+      const SEGS: Seg[] = [
+        { kind: 'spawn', dur: 0.5 }, { kind: 'pick', to: 0, dur: 0.55 }, { kind: 'hold', from: 0, dur: 0.4 },
+        { kind: 'toss', from: 0, to: 1, dur: 0.75 }, { kind: 'hold', from: 1, dur: 1.1 },
+        { kind: 'toss', from: 1, to: 2, dur: 0.75 }, { kind: 'hold', from: 2, dur: 0.35 }, { kind: 'deliver', from: 2, dur: 0.65 },
+      ];
+      let seg = 0, segT = 0, t = 0, cubeFlying = false;
+      const tmpA = new THREE.Vector3(), tmpB = new THREE.Vector3();
+      const handTmp = new THREE.Vector3();
+      const gripPos = (i: number, out: T.Vector3) => {
+        const r = robots[i];
+        r.hands[0].getWorldPosition(out); r.hands[1].getWorldPosition(handTmp);
+        out.add(handTmp).multiplyScalar(0.5);                                    // midpoint between the palms
+        return world.worldToLocal(out);
+      };
+      const pedTop = (out: T.Vector3) => out.set(pedestal.position.x, CL * pedestal.scale.y, pedestal.position.z);
+      const screenSlot = (out: T.Vector3) => { screenMesh.getWorldPosition(out); return world.worldToLocal(out); };
+      const arc = (a: T.Vector3, b: T.Vector3, k: number, h: number) => cube.position.lerpVectors(a, b, k).setY(cube.position.y + Math.sin(Math.PI * k) * h);
+      const ease = (k: number) => (k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2);
+      const lerp = (a: number, b: number, k: number) => a + (b - a) * k;
+      const yawTargets = [0.55, 0, -0.55];
+
+      function deliver() {
+        dash.packets++; dash.bucket++; dash.quality += (99.8 - dash.quality) * 0.2; dash.perRobot = dash.perRobot.map(v => v + 1);
+        dash.log.unshift(`Batch #${dash.packets} · pulled by Bolt, cleaned by Nova, published by Pixel · ${clock()}`);
+        dash.log = dash.log.slice(0, 3);
+        drawDashboard();
+      }
+
+      function work(dt: number) {
+        const s = SEGS[seg];
+        segT += dt / s.dur;
+        const k = ease(Math.min(1, segT));
+        const sc = robots[0].root.scale.x;
+        robots.forEach(r => { r.holding = 0; r.reach = 0; });
+        const targets = [...yawTargets];
+        cubeFlying = s.kind === 'toss' || s.kind === 'pick' || s.kind === 'deliver';
+        scanMat.opacity = 0;
+        if (s.kind === 'spawn') { setClean(false); gather = k; pedTop(cube.position); cube.scale.setScalar(Math.max(0.01, k) * sc); targets[0] = -0.7; }
+        else gather = Math.max(0, gather - dt * 2);
+        if (s.kind === 'pick') { pedTop(tmpA); gripPos(0, tmpB); arc(tmpA, tmpB, k, 0.5 * sc); robots[0].reach = 1 - k; robots[0].holding = k; targets[0] = lerp(-0.7, 0.55, k); }
+        if (s.kind === 'hold') {
+          gripPos(s.from!, cube.position); robots[s.from!].holding = 1;
+          if (s.from === 1) {                                                   // Nova scans the batch clean
+            scanner.position.copy(cube.position).setY(cube.position.y + Math.cos(k * Math.PI * 3) * 0.24 * sc);
+            scanner.scale.setScalar(sc); scanMat.opacity = Math.sin(k * Math.PI) * 0.9;
+            if (k > 0.5) setClean(true);
+          }
+        }
+        if (s.kind === 'toss') {
+          gripPos(s.from!, tmpA); gripPos(s.to!, tmpB); arc(tmpA, tmpB, k, 1.2 * sc);
+          if (segT === dt / s.dur || segT < 0.06) robots[s.from!].throwT = 0.28;   // throw swing at release
+          robots[s.from!].holding = k < 0.1 ? 1 : 0;
+          robots[s.to!].reach = Math.min(1, Math.max(0, (k - 0.2) / 0.5));          // reach out as it approaches
+          robots[s.to!].holding = k > 0.85 ? 1 : 0;
+          targets[s.to!] = s.to === 1 ? -0.45 : -0.6; targets[s.from!] = s.from === 0 ? 0.65 : 0.45;
+        }
+        if (s.kind === 'deliver') {
+          gripPos(2, tmpA); screenSlot(tmpB); arc(tmpA, tmpB, k, 0.6 * sc); cube.scale.setScalar((1 - k * 0.92) * sc);
+          robots[2].holding = 1 - k; targets[2] = lerp(-0.55, 0.8, Math.min(1, k * 2));
+        }
+        if (segT >= 1) {
+          segT = 0;
+          if (s.kind === 'deliver') { deliver(); cube.scale.setScalar(sc); }
+          if (s.kind === 'toss') robots[s.to!].recoil = 1;                         // absorb the catch
+          if (s.kind === 'pick') robots[0].recoil = 0.6;
+          seg = (seg + 1) % SEGS.length;
+        }
+        return targets;
+      }
+
+      const pose = (dt: number) => {
+        t += dt;
+        attention = lerp(attention, selected >= 0 ? 1 : 0, Math.min(1, dt * 6));
+        const engaged = attention > 0.5;
+        const targets = engaged ? yawTargets.map(() => 0) : work(dt);
+        robots.forEach((r, i) => {
+          r.yaw = lerp(r.yaw, targets[i], Math.min(1, dt * 6));
+          r.root.rotation.y = r.yaw;
+          let hy = 0, hx = 0;
+          if (engaged) { hy = pointer.active ? pointer.x * 0.6 - (r.root.position.x / (spacing * 3)) * 0.4 : 0; hx = pointer.active ? -pointer.y * 0.25 : -0.08; }
+          else { const dx = cube.position.x - r.root.position.x; hy = Math.max(-0.6, Math.min(0.6, dx * 0.18)) - r.yaw * 0.5; hx = Math.max(-0.3, Math.min(0.3, -(cube.position.y - 1.9) * 0.12)); }
+          r.head.rotation.y = lerp(r.head.rotation.y, hy, Math.min(1, dt * 7));
+          r.head.rotation.x = lerp(r.head.rotation.x, hx, Math.min(1, dt * 7));
+          const hold = r.holding, idle = Math.sin(t * 2 + i) * 0.08, waving = engaged && i === selected;
+          r.throwT = Math.max(0, r.throwT - dt); r.recoil = Math.max(0, r.recoil - dt * 3.5);
+          const carry = Math.max(hold, r.reach);
+          const throwing = r.throwT > 0;
+          // arm pitch: idle swing → forward cradle; reaching stretches further out; throwing flicks up
+          const pitch = throwing ? -1.75 : carry ? -1.0 - r.reach * 0.3 : idle;
+          const elbowBend = throwing ? -0.15 : hold ? -0.6 - r.recoil * 0.35 : r.reach ? -0.25 : -0.12;
+          const inward = carry || throwing ? 0.24 : 0;                              // bring the palms together around the cube
+          const k10 = Math.min(1, dt * (throwing ? 18 : 10));
+          r.arms[0].rotation.x = lerp(r.arms[0].rotation.x, pitch, k10);
+          r.arms[0].rotation.z = lerp(r.arms[0].rotation.z, inward, k10);
+          r.arms[1].rotation.x = lerp(r.arms[1].rotation.x, waving ? 0 : carry || throwing ? pitch : -idle, k10);
+          r.arms[1].rotation.z = lerp(r.arms[1].rotation.z, waving ? 1.9 + Math.sin(t * 11) * 0.3 : -inward, Math.min(1, dt * 9));
+          r.elbows.forEach((e, n) => { e.rotation.x = lerp(e.rotation.x, waving && n === 1 ? 0 : elbowBend, k10); });
+          r.legs[0].rotation.x = Math.sin(t * 2.2 + i) * 0.07; r.legs[1].rotation.x = -Math.sin(t * 2.2 + i) * 0.07;
+          r.knees.forEach((k, n) => { k.rotation.x = Math.max(0, (n ? -1 : 1) * Math.sin(t * 2.2 + i)) * 0.12 + r.recoil * 0.25; });
+          r.body.position.y = waving ? Math.abs(Math.sin(t * 7)) * 0.16 : Math.sin(t * 2 + i) * 0.025 - r.recoil * 0.07;
+          r.tip.emissiveIntensity = (waving ? 4.5 : 2) + Math.sin(t * 3 + i) * 0.8;
+          r.accent.emissiveIntensity = 2.2 + (hold ? 0.8 : 0) + Math.sin(t * 2 + i) * 0.2;
+          if (!waving && t > r.nextBlink) { r.face.draw('blink'); if (t > r.nextBlink + 0.12) { r.face.draw(engaged ? 'idle' : 'idle'); r.nextBlink = t + 2 + Math.random() * 3.5; } }
+        });
+        animateChaos(dt);
+        if (cubeFlying) { cube.rotation.x += dt * 4.5; cube.rotation.y += dt * 5.5; }      // spins only in the air
+        else { cube.rotation.x = lerp(cube.rotation.x, Math.round(cube.rotation.x / (Math.PI / 2)) * (Math.PI / 2), Math.min(1, dt * 8)); cube.rotation.y = lerp(cube.rotation.y, Math.round(cube.rotation.y / (Math.PI / 2)) * (Math.PI / 2), Math.min(1, dt * 8)); }
+        // dashboard: refresh clock/latency and roll the throughput history
+        dashTimer += dt;
+        if (dashTimer > 1.5) {
+          dashTimer = 0;
+          dash.history.push(2 + dash.bucket * 3 + Math.random() * 1.5); dash.history.shift(); dash.bucket = 0;
+          dash.latency = 120 + Math.round(Math.random() * 45);
+          drawDashboard();
+        }
+        placeBubble();
+      };
+
+      const render = () => renderer.render(scene, camera);
+      new ResizeObserver(() => { layout(); if (reduceMotion) render(); }).observe(host!);
+      layout();
+
+      if (reduceMotion) {
+        robots.forEach((r, i) => { r.root.rotation.y = yawTargets[i] * 0.6; });
+        robots[1].arms.forEach((a, n) => { a.rotation.x = -1.0; a.rotation.z = n ? -0.24 : 0.24; }); robots[1].elbows.forEach(e => (e.rotation.x = -0.6)); robots[1].root.updateMatrixWorld(true); gripPos(1, cube.position);
+        dash.packets = 12; dash.quality = 98.9; dash.perRobot = [12, 12, 12]; dash.log = ['Batch #12 · pulled by Bolt, cleaned by Nova, published by Pixel']; setClean(true); animateChaos(0);
+        drawDashboard();
+        render();
+        return;
+      }
+
+      let last = performance.now();
+      const frame = (now: number) => {
+        const dt = Math.min(0.05, (now - last) / 1000); last = now;
+        if (visible && !document.hidden) { pose(dt); render(); }
+        requestAnimationFrame(frame);
+      };
+      requestAnimationFrame(frame);
+    }
+  }
+</script>

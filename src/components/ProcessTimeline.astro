@@ -1,0 +1,25 @@
+---
+// "How I work" timeline. Step wording is a draft — edit freely.
+import SectionHeading from './SectionHeading.astro';
+import Icon from './Icon.astro';
+const steps = [
+  { icon: 'discover', title: 'Discover', text: 'Clarify the business problem, users, data and constraints before choosing technology.' },
+  { icon: 'design', title: 'Design', text: 'Shape the architecture, security model and user experience together.' },
+  { icon: 'build', title: 'Build', text: 'Deliver iteratively with Power Platform, Azure and Microsoft AI services.' },
+  { icon: 'govern', title: 'Govern', text: 'Build in ALM, identity, data protection and responsible-AI guardrails.' },
+  { icon: 'evolve', title: 'Evolve', text: 'Measure, improve, and share what I learn with the Microsoft community.' },
+];
+---
+<section class="section" id="process"><div class="container">
+  <SectionHeading eyebrow="03 / HOW I WORK" title="From idea to dependable solution." subtitle="A practical delivery approach that keeps security, governance and people in the loop." />
+  <ol class="process">
+    {steps.map((s, i) => (
+      <li class="process-step">
+        <span class="process-icon"><Icon name={s.icon} /></span>
+        <span class="process-num">{String(i + 1).padStart(2, '0')}</span>
+        <h3>{s.title}</h3>
+        <p>{s.text}</p>
+      </li>
+    ))}
+  </ol>
+</div></section>

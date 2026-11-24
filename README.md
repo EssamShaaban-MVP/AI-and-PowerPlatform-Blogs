@@ -102,17 +102,17 @@ Most edits happen in **`src/data/site.ts`** — pages read from it, so nothing n
 
 ## Dark / light theme
 
-- **Default:** Midnight Azure (dark). First-time visitors get their system preference (`prefers-color-scheme`); dark is the fallback.
-- **Toggle:** the sun/moon button in the header (desktop and mobile). A manual choice is saved in `localStorage` (`theme`) and wins over the system preference.
+- **Default:** the mixed design for every first-time visitor: dark Midnight Azure header, hero and feature panels (expertise cards, credential stats, MVP banner, thumbnails) on light content sections. The switch turns the whole site dark.
+- **Toggle:** the sun/moon switch in the header (desktop and mobile). A manual choice is saved in `localStorage` (`theme`) and reused on later visits.
 - **No flash:** an inline script in `<head>` (`src/layouts/Base.astro`) sets `data-theme` on `<html>` before the page paints.
-- **Colours:** every colour in `global.css` is a token from **`src/styles/theme.css`**, named after its original hex (e.g. `var(--c-070d1a)`). The `:root` block holds the dark values; `:root[data-theme="light"]` holds the light values. Hand-tuned light gradients (hero, artwork, contact, featured cards) are at the end of `theme.css`.
+- **Colours:** every colour in `global.css` is a token from **`src/styles/theme.css`**, named after its original hex (e.g. `var(--c-070d1a)`). The `:root` block holds the dark values; `:root[data-theme="light"]` holds the light values. Dark "islands" (areas that stay dark in the light theme) re-declare the dark tokens; see the end of `theme.css`.
 - **Adding a colour:** add a `--c-<hex>` pair to both blocks in `theme.css` and use `var(--c-<hex>)` — don't put raw hex values in `global.css`, or they won't change with the theme.
 - **Code blocks:** Shiki renders GitHub Dark / GitHub Light (`markdown.shikiConfig` in `astro.config.mjs`).
-- Theme switches use a short colour fade, disabled for `prefers-reduced-motion`.
+- Switching is instant; only the switch knob animates (disabled for `prefers-reduced-motion`).
 
 ## Typography
 
-- **Fonts:** Inter (variable) for all text and JetBrains Mono for code only, self-hosted from the `@fontsource-variable/inter` and `@fontsource/jetbrains-mono` packages (WOFF2, `font-display: swap`). Imported in `src/layouts/Base.astro`; the Latin Inter file is preloaded. No Google Fonts requests.
+- **Fonts:** Urbanist (variable) for all text and JetBrains Mono for code only, self-hosted from the `@fontsource-variable/urbanist` and `@fontsource/jetbrains-mono` packages (WOFF2, `font-display: swap`). Imported in `src/layouts/Base.astro`; the Latin Urbanist file is preloaded. No Google Fonts requests.
 - **Type scale:** CSS variables at the "Typography system" section of `src/styles/global.css` — `--font-sans`, `--font-mono`, fluid sizes (`--fs-hero`, `--fs-section`, `--fs-card`, `--fs-body`, `--fs-article`, `--fs-code`…), line heights (`--lh-body` 1.65, `--lh-article` 1.75) and `--measure` (article reading width ≈ 65–75 characters).
 - Use these variables for new text styles instead of fixed pixel sizes.
 
