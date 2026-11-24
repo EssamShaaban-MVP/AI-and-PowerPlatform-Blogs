@@ -103,15 +103,9 @@ const verify = site.seo ?? {};
   </header>
   <nav id="mobile-menu" class="mobile-nav container" aria-label="Mobile navigation" hidden>{links.map(([name,path]) => <a href={href(path)}>{name}</a>)}<a href={href('/#contact')}>Contact</a></nav></div>
   <main id="main" tabindex="-1"><slot /></main>
-  <footer class="footer container"><div class="footer-top">
-    <div class="footer-brand">
-      <a class="brand" href={href('/')}><span class="brand-mark">E<span>.</span></span><span class="brand-label">ESSAM <span class="brand-muted">/ SHAABAN</span></span></a>
-      <p>Microsoft MVP and Senior Software Engineer focused on Power Platform, agentic AI and enterprise solution architecture.</p>
-    </div>
-    <nav class="footer-col" aria-label="Explore"><h2>Explore</h2>{links.map(([name, path]) => <a href={href(path)}>{name}</a>)}</nav>
-    <nav class="footer-col" aria-label="Profiles"><h2>Profiles</h2>{site.links.linkedin && <a href={site.links.linkedin} target="_blank" rel="noopener">LinkedIn</a>}{site.links.mvp && <a href={site.links.mvp} target="_blank" rel="noopener">MVP profile</a>}{site.links.learnTranscript && <a href={site.links.learnTranscript} target="_blank" rel="noopener">Microsoft Learn</a>}{site.links.email && <a href={`mailto:${site.links.email}`}>Email</a>}</nav>
-    <nav class="footer-col" aria-label="Resources"><h2>Resources</h2><a href={href('/rss.xml')}>RSS feed</a><a href={href('/sitemap-index.xml')}>Sitemap</a><a href={href('/#contact')}>Contact</a></nav>
-  </div><div class="footer-bottom"><span>© {new Date().getFullYear()} Essam Shaaban. All rights reserved.</span><span>Built with Astro · Hosted on GitHub Pages</span><a href="#top">Back to top ↑</a></div></footer>
+  <footer class="footer"><div class="footer-simple">
+    <span class="footer-copy">© {new Date().getFullYear()} Essam Shaaban</span>
+  </div></footer>
 </div>
 <script>
 const button = document.querySelector<HTMLButtonElement>('.menu-toggle');

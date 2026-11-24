@@ -92,7 +92,7 @@ const team = [
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       renderer.outputColorSpace = THREE.SRGBColorSpace;
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
-      renderer.toneMappingExposure = 1.0;
+      renderer.toneMappingExposure = 0.95;
 
       const scene = new THREE.Scene();
       const pmrem = new THREE.PMREMGenerator(renderer);
@@ -102,11 +102,11 @@ const team = [
       camera.position.set(0, 2.7, 12.5);
       camera.lookAt(0, 1.55, 0);
       scene.add(new THREE.HemisphereLight(0xe6f1ff, 0x22324f, 0.6));
-      const key = new THREE.DirectionalLight(0xffffff, 1.6); key.position.set(3.5, 6, 6); scene.add(key);
-      const rim = new THREE.DirectionalLight(0x4cc8ff, 1.4); rim.position.set(-5, 3, -4); scene.add(rim);
+      const key = new THREE.DirectionalLight(0xffffff, 1.25); key.position.set(3.5, 6, 6); scene.add(key);
+      const rim = new THREE.DirectionalLight(0x4cc8ff, 0.9); rim.position.set(-5, 3, -4); scene.add(rim);
 
       // Shared materials: pearl clear-coat shell, graphite metal, dark glass, brushed aluminium
-      const shell = new THREE.MeshPhysicalMaterial({ color: 0xf5f8fc, roughness: 0.2, metalness: 0, clearcoat: 1, clearcoatRoughness: 0.06, iridescence: 0.18, iridescenceIOR: 1.3, sheen: 0.25, sheenColor: new THREE.Color(0xbfe3ff) });
+      const shell = new THREE.MeshPhysicalMaterial({ color: 0xeef2f7, roughness: 0.38, metalness: 0, clearcoat: 0.45, clearcoatRoughness: 0.3, envMapIntensity: 0.7 });
       const graphite = new THREE.MeshPhysicalMaterial({ color: 0x1c2532, roughness: 0.32, metalness: 0.75, clearcoat: 0.4, clearcoatRoughness: 0.3 });
       const glass = new THREE.MeshPhysicalMaterial({ color: 0x050b16, roughness: 0.04, metalness: 0.2, clearcoat: 1, clearcoatRoughness: 0.02 });
       const alu = new THREE.MeshPhysicalMaterial({ color: 0xc9d2dd, roughness: 0.28, metalness: 1 });
@@ -173,7 +173,7 @@ const team = [
         hands: T.Group[]; reach: number; recoil: number; throwT: number;
       };
       const chrome = new THREE.MeshPhysicalMaterial({ color: 0x9aa7b8, roughness: 0.18, metalness: 1, clearcoat: 0.6 });
-      const darkJoint = new THREE.MeshPhysicalMaterial({ color: 0x1a2230, roughness: 0.3, metalness: 0.4, clearcoat: 0.8, clearcoatRoughness: 0.1 });
+      const darkJoint = new THREE.MeshPhysicalMaterial({ color: 0x1a2230, roughness: 0.4, metalness: 0.35, clearcoat: 0.35, clearcoatRoughness: 0.3, envMapIntensity: 0.6 });
       const cap = (r: number, l: number) => new THREE.CapsuleGeometry(r, l, 8, 18);
       const ball = (r: number) => new THREE.SphereGeometry(r, 24, 18);
       // short, round egg body (lathe)
@@ -205,11 +205,8 @@ const team = [
         };
         head.add(seg(1.006, 2.08, 1.36, new THREE.MeshPhysicalMaterial({ color: 0x1a2230, roughness: 0.3, metalness: 0.4, clearcoat: 0.8, alphaMap: rimMask, alphaTest: 0.5 }))); // screen bezel
         const face = makeFace(accentCss);
-        const visorMat = new THREE.MeshPhysicalMaterial({ color: 0x03060c, roughness: 0.05, metalness: 0.2, clearcoat: 1, clearcoatRoughness: 0.02, emissive: 0xffffff, emissiveMap: face.tex, emissiveIntensity: 2.6, alphaMap: visorMask, alphaTest: 0.5 });
+        const visorMat = new THREE.MeshPhysicalMaterial({ color: 0x03060c, roughness: 0.3, metalness: 0.1, clearcoat: 0.35, clearcoatRoughness: 0.35, envMapIntensity: 0.3, emissive: 0xffffff, emissiveMap: face.tex, emissiveIntensity: 2.6, alphaMap: visorMask, alphaTest: 0.5 });
         head.add(seg(1.012, 1.96, 1.24, visorMat));                              // glossy black screen with glowing eyes
-        const shine = new THREE.Mesh(squircle(new THREE.SphereGeometry(1.02, 48, 16, Math.PI / 2 - 0.75, 0.55, Math.PI / 2 - 0.55, 0.16)),
-          new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.2, depthWrite: false }));
-        shine.position.y = HC; head.add(shine);                                  // soft reflection on the screen
         // headphone ear pods: dark housing, white cap, glowing ring
         [-1, 1].forEach(sd => {
           const pod = new THREE.Group(); pod.position.set(sd * 0.9, HC - 0.02, -0.02); pod.rotation.z = Math.PI / 2; head.add(pod);
@@ -437,8 +434,9 @@ const team = [
         spacing = Math.min(3.1, (visibleW - 0.4) / 5.4);
         const s = Math.min(1, spacing / 3.1);
         robots.forEach((r, i) => { r.root.position.x = (i - 1) * spacing; r.root.scale.setScalar(s * 1.15); });
-        pedestal.position.x = -spacing * 1.7; pedestal.scale.setScalar(s);
-        monitor.position.x = spacing * 2.2; monitor.scale.setScalar(s * 1.35);
+        pedestal.position.x = -spacing * 2.0; pedestal.scale.setScalar(s);
+        monitor.position.x = spacing * 2.15;
+        world.position.x = -spacing * 0.12; monitor.scale.setScalar(s * 1.35);
         cube.scale.setScalar(s * 1.15);
         placeHits();
       };

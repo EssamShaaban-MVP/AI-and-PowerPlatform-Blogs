@@ -504,16 +504,11 @@ code,kbd,samp,pre{font-family:var(--font-mono)}
 .contact-inner .button-secondary{background:transparent;border-color:#ffffff8c;color:#fff}
 .contact-inner .button-secondary:hover{background:#ffffff1a;border-color:#fff}
 .contact-inner .button:focus-visible{outline-color:#fff}
-/* Multi-column footer */
-.footer{padding-top:56px}
-.footer-top{display:grid;grid-template-columns:minmax(0,1.6fr) repeat(3,minmax(0,1fr));gap:40px;align-items:start}
-.footer-brand p{margin:16px 0 0;max-width:340px;font-size:var(--fs-small);line-height:1.6;color:var(--text-2)}
-.footer-col{display:flex;flex-direction:column;gap:10px}
-.footer-col h2{margin:0 0 4px;font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--text-3)}
-.footer-col a{font-size:var(--fs-small);color:var(--text-2);text-decoration:none;width:fit-content}
-.footer-col a:hover{color:var(--text-1)}
-@media(max-width:900px){.footer-top{grid-template-columns:1fr 1fr;gap:32px}.footer-brand{grid-column:1/-1}}
-@media(max-width:520px){.footer-top{grid-template-columns:1fr}}
+/* Simple footer */
+.footer{width:100%;padding:28px clamp(16px,4vw,56px) 32px;border-top:1px solid var(--line);position:relative;z-index:1}
+.footer-simple{display:flex;justify-content:center;align-items:center}
+.contact-inner.container{width:calc(100% - 2 * clamp(16px,4vw,56px))}
+.footer-copy{font-size:var(--fs-small);color:var(--text-3)}
 @media(min-width:1001px){.process:before{right:calc((100% - 80px) / 5 - 28px)}}
 
 /* About section: 3D robot (WebGL canvas, decorative) */
