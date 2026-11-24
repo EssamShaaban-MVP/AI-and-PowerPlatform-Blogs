@@ -1,82 +1,220 @@
-# Essam Shaaban — Midnight Azure Portfolio + Technical Blog
+# Essam Shaaban — Portfolio & Technical Blog
 
-A modern, responsive, static Astro portfolio for GitHub Pages. Includes six homepage sections, eight Microsoft certifications, Microsoft MVP recognition, and a Markdown technical blog with categories and instant client-side search.
+Professional portfolio and technical blog focused on Microsoft Foundry, Copilot Studio, Power Platform, Agentic AI, and enterprise solution architecture.
+
+**Live site:** https://essamshaaban-mvp.github.io/AI-and-PowerPlatform-Blogs/
+
+A static [Astro](https://astro.build) site ("Midnight Azure" theme) deployed to GitHub Pages with GitHub Actions. No backend, database, API keys or paid services.
+
+---
+
+## Contents
+
+- [Requirements](#requirements)
+- [Local development](#local-development)
+- [Scripts](#scripts)
+- [Project structure](#project-structure)
+- [Editing content](#editing-content)
+- [Publishing a new blog post](#publishing-a-new-blog-post)
+- [Production build](#production-build)
+- [Deployment](#deployment)
+- [SEO, RSS and social sharing](#seo-rss-and-social-sharing)
+- [Assets and trademarks](#assets-and-trademarks)
+- [Troubleshooting](#troubleshooting)
+
+## Requirements
+
+- **Node.js 22.23.4 or newer** (the deployment workflow uses Node 24)
+- **npm** (a `package-lock.json` is committed — use `npm ci` for a clean, reproducible install)
 
 ## Local development
 
-Requires Node.js 22.12+ (Node 24 recommended) and npm.
+```bash
+npm ci          # install exact locked dependencies
+npm run dev     # start the dev server
+```
+
+Open http://localhost:4321/. Locally the site is served from `/`; in production it lives under `/AI-and-PowerPlatform-Blogs/` (see [Deployment](#deployment)). All internal links are built from `import.meta.env.BASE_URL`, so they work in both.
+
+## Scripts
+
+| Command | What it does |
+|---|---|
+| `npm run dev` | Dev server with hot reload |
+| `npm run build` | Production build into `dist/` |
+| `npm run preview` | Serve the built `dist/` locally |
+| `npm run check` | Type-check `.astro` / `.ts` files (`astro check`) |
+| `npm run og` | Regenerate social share images in `public/og/` (run after adding or renaming an article) |
+
+## Project structure
+
+```text
+.
+├── .github/workflows/deploy.yml   # Build + deploy to GitHub Pages
+├── astro.config.mjs               # site URL, base path, sitemap integration
+├── scripts/generate-og.mjs        # Builds 1200×630 Open Graph images (npm run og)
+├── public/                        # Copied as-is to the site root
+│   ├── badges/                    # Official Microsoft certification + MVP badges
+│   ├── logos/                     # Official Microsoft product icons + MCP mark
+│   ├── og/                        # Generated social share images (home, certifications, blog, per article)
+│   ├── essam-shaaban-cutout*.webp # Hero portrait (transparent)
+│   └── favicon.svg, og-image.jpg
+└── src/
+    ├── data/site.ts               # ★ Single source for profile, links, MVP, certifications, projects
+    ├── content.config.ts          # Blog collection schema (frontmatter validation)
+    ├── content/blog/*.md          # ★ Blog articles (one Markdown file per post)
+    ├── lib/seo.ts                 # Absolute URLs + JSON-LD (Person, WebSite, breadcrumbs)
+    ├── layouts/Base.astro         # <head> metadata, header, footer, scroll-reveal script
+    ├── components/
+    │   ├── SectionHeading.astro   # Numbered section titles
+    │   ├── ExpertiseSection.astro # Expertise cards (logos per capability)
+    │   ├── MvpBanner.astro        # Microsoft MVP banner (home + certifications)
+    │   ├── ShareLinks.astro       # LinkedIn share + copy link on articles
+    │   └── Icon.astro             # Line icons for project/article artwork
+    ├── pages/
+    │   ├── index.astro            # Home
+    │   ├── certifications.astro   # Certifications gallery
+    │   ├── blog/index.astro       # Blog list with search + category filters
+    │   ├── blog/[slug].astro      # Article page (one per Markdown file)
+    │   ├── rss.xml.js             # RSS feed
+    │   └── robots.txt.ts          # robots.txt with sitemap location
+    ├── styles/theme.css           # Colour tokens for dark + light themes
+    └── styles/global.css          # All styles (layout, components) using theme tokens
+```
+
+## Editing content
+
+Most edits happen in **`src/data/site.ts`** — pages read from it, so nothing needs to be changed in two places.
+
+| What | Where |
+|---|---|
+| Name, intro, location, public profile links | `site` in `src/data/site.ts` |
+| Search console verification codes | `site.seo` in `src/data/site.ts` |
+| MVP category, first year, current award, badge | `mvp` in `src/data/site.ts` |
+| Certifications (titles, codes, dates, status, badge, verify link) | `certifications` in `src/data/site.ts` |
+| Selected work cards | `projects` in `src/data/site.ts` |
+| Expertise cards | `src/components/ExpertiseSection.astro` |
+| Colours, spacing, typography | `src/styles/global.css` |
+
+**Certifications:** keep entries in sync with the Microsoft Learn transcript (`site.links.learnTranscript`). Set `expires` only when the transcript shows one, and `status: 'expired'` when it lapses. To link a single credential, paste its Microsoft Learn share URL into `verifyUrl` — never guess one.
+
+**MVP renewal:** add the new official badge to `public/badges/`, update `mvp.currentAward` and the badge paths, then run `npm run og` so the share images show the new badge.
+
+## Dark / light theme
+
+- **Default:** Midnight Azure (dark). First-time visitors get their system preference (`prefers-color-scheme`); dark is the fallback.
+- **Toggle:** the sun/moon button in the header (desktop and mobile). A manual choice is saved in `localStorage` (`theme`) and wins over the system preference.
+- **No flash:** an inline script in `<head>` (`src/layouts/Base.astro`) sets `data-theme` on `<html>` before the page paints.
+- **Colours:** every colour in `global.css` is a token from **`src/styles/theme.css`**, named after its original hex (e.g. `var(--c-070d1a)`). The `:root` block holds the dark values; `:root[data-theme="light"]` holds the light values. Hand-tuned light gradients (hero, artwork, contact, featured cards) are at the end of `theme.css`.
+- **Adding a colour:** add a `--c-<hex>` pair to both blocks in `theme.css` and use `var(--c-<hex>)` — don't put raw hex values in `global.css`, or they won't change with the theme.
+- **Code blocks:** Shiki renders GitHub Dark / GitHub Light (`markdown.shikiConfig` in `astro.config.mjs`).
+- Theme switches use a short colour fade, disabled for `prefers-reduced-motion`.
+
+## Typography
+
+- **Fonts:** Inter (variable) for all text and JetBrains Mono for code only, self-hosted from the `@fontsource-variable/inter` and `@fontsource/jetbrains-mono` packages (WOFF2, `font-display: swap`). Imported in `src/layouts/Base.astro`; the Latin Inter file is preloaded. No Google Fonts requests.
+- **Type scale:** CSS variables at the "Typography system" section of `src/styles/global.css` — `--font-sans`, `--font-mono`, fluid sizes (`--fs-hero`, `--fs-section`, `--fs-card`, `--fs-body`, `--fs-article`, `--fs-code`…), line heights (`--lh-body` 1.65, `--lh-article` 1.75) and `--measure` (article reading width ≈ 65–75 characters).
+- Use these variables for new text styles instead of fixed pixel sizes.
+
+## Publishing a new blog post
+
+1. **Create** `src/content/blog/<url-slug>.md`. The file name becomes the URL: `/blog/<url-slug>/`.
+
+   ```md
+   ---
+   title: "Your article title"
+   description: "One sentence used in listings, search results and social previews."
+   date: 2026-12-01
+   category: "Agentic AI"          # existing: Agentic AI, Architecture, Power Platform
+   tags: ["Microsoft Foundry", "Security"]
+   readingMinutes: 6               # optional (defaults to 5)
+   draft: false                    # true = hidden from every listing, route, RSS and sitemap
+   ---
+
+   ## First section
+
+   Markdown content. Use `##` for sections — they appear in the "On this page" table of contents.
+   ```
+
+   The frontmatter is validated by `src/content.config.ts`; the build fails with a clear message if a field is missing or mistyped.
+
+2. **Generate the share image:** `npm run og` (creates `public/og/blog/<url-slug>.jpg`). Without it the article falls back to the generic blog image.
+3. **Preview:** `npm run dev` and open `/blog/<url-slug>/`.
+4. **Build check:** `npm run build`.
+5. **Commit and push** to `main` — the workflow deploys automatically.
+
+The new post appears automatically in the blog list, search and filters, the home page "latest articles" (newest three), the RSS feed, the sitemap, and the structured data. New categories also get a filter button; add an icon for them in `blogIcon` (`src/pages/index.astro` and `src/pages/blog/index.astro`), otherwise a default icon is used.
+
+## Production build
 
 ```bash
-npm install
-npm run dev
+npm run build      # output in dist/
+npm run preview    # serve dist/ locally
 ```
 
-Open `http://localhost:4321`. Production build:
+To reproduce the exact production URLs locally (canonical links, sitemap, RSS):
 
 ```bash
-npm run build
-npm run preview
+# bash / Git Bash
+SITE_URL=https://essamshaaban-mvp.github.io BASE_PATH=/AI-and-PowerPlatform-Blogs npm run build
 ```
 
-## Publish free on GitHub Pages
-
-1. Create a **public** GitHub repository. For a root site, use `YOUR_GITHUB_USERNAME.github.io`. For a project site, any repo name is fine.
-2. Upload these project files to the repository root or push with Git. Use `main` as the default branch.
-3. In GitHub **Settings → Pages → Build and deployment → Source**, select **GitHub Actions**.
-4. In **Settings → Secrets and variables → Actions → Variables**, create:
-   - `SITE_URL` = `https://YOUR_GITHUB_USERNAME.github.io`
-   - `BASE_PATH` = `/` for `YOUR_GITHUB_USERNAME.github.io`, or `/YOUR_REPOSITORY_NAME` for a project repository.
-5. Push to `main` or run **Actions → Deploy Astro to GitHub Pages → Run workflow**.
-6. Open `https://YOUR_GITHUB_USERNAME.github.io/` (root) or `https://YOUR_GITHUB_USERNAME.github.io/YOUR_REPOSITORY_NAME/` (project).
-
-A custom domain can be configured later following GitHub Pages' domain instructions; update `SITE_URL` and `BASE_PATH` accordingly.
-
-## Customize the portfolio
-
-- **Name, intro, verified public links, certifications, case studies:** `src/data/site.ts`
-- **Colors, typography, and page layout:** `src/styles/global.css`
-- **Home:** `src/pages/index.astro`
-- **Credential page:** `src/pages/certifications.astro`
-- **Header/footer:** `src/layouts/Base.astro`
-
-The 8 certification names/dates are based on the supplied screenshot. The MVP recognition is included separately. Project copy is intentionally high-level and must be reviewed before public release. No email address, social profile URLs, photographs, client names, testimonials or proprietary data have been invented.
-
-## Add a blog article
-
-Create `src/content/blog/my-new-article.md`:
-
-```md
----
-title: "My new article"
-description: "A one-sentence summary."
-date: 2026-11-23
-category: "Agentic AI"
-tags: ["Azure", "Architecture"]
-readingMinutes: 5
----
-
-## Introduction
-
-Your Markdown content here.
+```powershell
+# PowerShell
+$env:SITE_URL='https://essamshaaban-mvp.github.io'; $env:BASE_PATH='/AI-and-PowerPlatform-Blogs'; npm run build
 ```
 
-A new article automatically appears in the blog, search, category filters, homepage latest posts, and generates its own URL. Mark `draft: true` in frontmatter to hide it from production listings/routes.
+> In Git Bash on Windows, prefix with `MSYS_NO_PATHCONV=1` so `/AI-and-PowerPlatform-Blogs` isn't rewritten into a Windows path.
 
-Three **illustrative starter articles** are included. Edit or replace them before claiming they document tested implementations.
+## Deployment
 
-## Important pre-publication steps
+Deployment is fully automated by [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml):
 
-- Fill your genuine LinkedIn, GitHub, Microsoft Learn, and contact URLs in `src/data/site.ts`; wire the contact CTA to your chosen public profile if desired. The current contact section only links to the blog and does not pretend to have a working email/contact form.
-- Review the project summaries and ensure they are approved for public use.
-- Review certification expirations over time. Certification verification links are not yet supplied.
-- Optional: add your portrait and an authentic Microsoft MVP badge asset if usage permissions allow.
+- **Triggers:** every push to `main`, or manually via **Actions → Deploy Astro to GitHub Pages → Run workflow**.
+- **`build` job** (permission: `contents: read`): checks out the code, warns if the Pages variables are missing, then `withastro/action` installs dependencies, runs the build and uploads the Pages artifact.
+- **`deploy` job** (permissions: `pages: write`, `id-token: write`): publishes the artifact with `actions/deploy-pages`.
+- The workflow grants no permissions by default (`permissions: {}`); each job requests only what it needs.
 
-## Tech
+### One-time repository settings
 
-Astro 7, content collections, semantic HTML, vanilla CSS and tiny vanilla JS enhancements, GitHub Pages Action. No premium services, API keys, or backend required.
+| Setting | Value |
+|---|---|
+| **Settings → Pages → Source** | GitHub Actions |
+| **Settings → Secrets and variables → Actions → Variables → `SITE_URL`** | `https://essamshaaban-mvp.github.io` |
+| **… → `BASE_PATH`** | `/AI-and-PowerPlatform-Blogs` |
 
-## Official docs
+`SITE_URL` and `BASE_PATH` feed `site` and `base` in `astro.config.mjs`. They must match the real Pages address — if the GitHub username or repository name changes, update them, otherwise canonical URLs, the sitemap and RSS will point to the old address.
 
-- https://docs.astro.build/en/guides/content-collections/
-- https://docs.astro.build/en/guides/deploy/github/
-- https://docs.github.com/en/pages
+No secrets are required.
+
+## SEO, RSS and social sharing
+
+| Item | URL / location |
+|---|---|
+| Sitemap | `/AI-and-PowerPlatform-Blogs/sitemap-index.xml` (generated by `@astrojs/sitemap`) |
+| RSS feed | `/AI-and-PowerPlatform-Blogs/rss.xml` |
+| robots.txt | `/AI-and-PowerPlatform-Blogs/robots.txt` |
+| Page metadata (title, description, canonical, Open Graph, Twitter) | `src/layouts/Base.astro`, props set per page |
+| Structured data (JSON-LD) | `src/lib/seo.ts` + each page (`ProfilePage`/`Person`, `Blog`, `BlogPosting`, `BreadcrumbList`) |
+| Share images | `public/og/` (regenerate with `npm run og`) |
+
+Notes:
+
+- Search engines only read `robots.txt` at a domain root; for this project site the sitemap is discovered through the `<link rel="sitemap">` tag on every page and by submitting it in Google Search Console / Bing Webmaster Tools.
+- To verify ownership, paste the "HTML tag" codes into `site.seo` in `src/data/site.ts` and redeploy.
+- Check social previews with [LinkedIn Post Inspector](https://www.linkedin.com/post-inspector/).
+
+## Assets and trademarks
+
+- Microsoft certification badges, the Microsoft MVP badge and Microsoft product icons come from Microsoft's official public icon sets / Microsoft Learn and remain trademarks of Microsoft. The Model Context Protocol mark is from the official MCP repository.
+- The portrait is the site owner's photograph. Source/original photos are kept out of the repository via `.gitignore`.
+
+## Troubleshooting
+
+| Symptom | Likely cause |
+|---|---|
+| Live site has no styles or broken links | `BASE_PATH` variable missing or wrong |
+| Canonical URLs / sitemap show `example.github.io` | `SITE_URL` variable missing (the workflow prints a warning) |
+| Old `*.github.io` address returns 404 | GitHub Pages doesn't redirect after a username change — update shared links |
+| Article shares show the generic image | Run `npm run og` and commit `public/og/blog/<slug>.jpg` |
+| `npm run og` fails | Run `npm ci` first (uses the `sharp` dev dependency) |

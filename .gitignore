@@ -1,9 +1,24 @@
+# Dependencies and build output
 node_modules/
 dist/
 .astro/
-.DS_Store
+
+# Logs
+npm-debug.log*
+*.log
+
+# Local environment files
 .env
+.env.*
+
+# OS / editor files
+.DS_Store
+Thumbs.db
+
+# Local test screenshots (Playwright)
 .playwright-mcp/
+
+# Original/source photos kept out of the repository (optimized versions live in public/)
 public/7361289433-001.jpg
 public/Friendly Bearded Man Portrait.png
 public/Modern Corporate Portrait with Blue Glow.png
