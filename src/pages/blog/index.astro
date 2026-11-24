@@ -5,9 +5,31 @@ const posts = (await getCollection('blog',({data})=>!data.draft)).sort((a,b)=>b.
 const categories = ['All', ...new Set(posts.map(p=>p.data.category))];
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 import Icon from '../../components/Icon.astro';
+import { abs, breadcrumbs, personRef } from '../../lib/seo';
+const jsonLd = [
+  {
+    '@type': 'Blog',
+    '@id': abs('/blog/') + '#blog',
+    name: 'Essam Shaaban — Technical Blog',
+    description: 'Hands-on notes on Microsoft Foundry, agentic AI, Power Platform, and secure integration.',
+    url: abs('/blog/'),
+    inLanguage: 'en-US',
+    author: personRef,
+    publisher: personRef,
+    blogPost: posts.map(p => ({
+      '@type': 'BlogPosting',
+      '@id': abs(`/blog/${p.id}/`) + '#article',
+      headline: p.data.title,
+      url: abs(`/blog/${p.id}/`),
+      datePublished: p.data.date.toISOString(),
+      author: personRef,
+    })),
+  },
+  breadcrumbs([['Home', '/'], ['Blog', '/blog/']]),
+];
 const blogIcon: Record<string,string> = { 'Agentic AI':'sparkles', 'Architecture':'layers', 'Power Platform':'workflow' };
 ---
-<Base title="Technical Blog | Essam Shaaban" description="Hands-on notes on Microsoft Foundry, agentic AI, Power Platform, and secure integration."><section class="page-heading container"><span class="eyebrow">THE KNOWLEDGE BASE</span><h1>Thinking out loud.<br/><span class="gradient-text">Building in public.</span></h1><p>Architecture notes, implementation guides, and lessons learned across AI, low-code, and cloud engineering.</p></section><section class="container blog-page"><div class="blog-tools"><div class="category-filters" aria-label="Filter articles by topic">{categories.map((c,i)=><button class:list={['filter-button',i===0&&'active']} type="button" data-category={c}>{c}</button>)}</div><label class="blog-search"><span aria-hidden="true">⌕</span><input type="search" id="post-search" placeholder="Search articles..." aria-label="Search articles" /></label></div><div class="post-list" id="post-list">{posts.map((post,i)=><a data-category={post.data.category} data-search={`${post.data.title} ${post.data.description} ${post.data.tags.join(' ')}`.toLowerCase()} class="post-list-item" href={`${base}/blog/${post.id}/`}><div class:list={['list-art','blog-art-'+i%3]}><Icon name={blogIcon[post.data.category] ?? 'layers'} /></div><div class="post-list-info"><div class="post-meta"><span>{post.data.category}</span><span>{post.data.date.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</span><span>{post.data.readingMinutes??5} MIN READ</span></div><h2>{post.data.title}</h2><p>{post.data.description}</p><div class="tag-row">{post.data.tags.map(t=><span>{t}</span>)}</div></div><div class="post-arrow">↗</div></a>)}</div><p id="no-results" class="empty-results" hidden>No matching articles. Try another search or topic.</p></section><script>
+<Base title="Technical Blog: Agentic AI & Power Platform | Essam Shaaban" description="Hands-on notes on Microsoft Foundry, agentic AI, Power Platform, and secure integration." image="/og/blog.jpg" imageAlt="Technical blog by Essam Shaaban — notes from the field" jsonLd={jsonLd}><section class="page-heading container"><span class="eyebrow">THE KNOWLEDGE BASE</span><h1>Thinking out loud.<br/><span class="gradient-text">Building in public.</span></h1><p>Architecture notes, implementation guides, and lessons learned across AI, low-code, and cloud engineering.</p></section><section class="container blog-page"><div class="blog-tools"><div class="category-filters" aria-label="Filter articles by topic">{categories.map((c,i)=><button class:list={['filter-button',i===0&&'active']} type="button" data-category={c}>{c}</button>)}</div><label class="blog-search"><span aria-hidden="true">⌕</span><input type="search" id="post-search" placeholder="Search articles..." aria-label="Search articles" /></label></div><div class="post-list" id="post-list">{posts.map((post,i)=><a data-category={post.data.category} data-search={`${post.data.title} ${post.data.description} ${post.data.tags.join(' ')}`.toLowerCase()} class="post-list-item" href={`${base}/blog/${post.id}/`}><div class:list={['list-art','blog-art-'+i%3]}><Icon name={blogIcon[post.data.category] ?? 'layers'} /></div><div class="post-list-info"><div class="post-meta"><span>{post.data.category}</span><time datetime={post.data.date.toISOString().slice(0,10)}>{post.data.date.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric',timeZone:'UTC'})}</time><span>{post.data.readingMinutes??5} MIN READ</span></div><h2>{post.data.title}</h2><p>{post.data.description}</p><div class="tag-row">{post.data.tags.map(t=><span>{t}</span>)}</div></div><div class="post-arrow">↗</div></a>)}</div><p id="no-results" class="empty-results" hidden>No matching articles. Try another search or topic.</p></section><script>
 const filters = document.querySelectorAll<HTMLButtonElement>('.filter-button');
 const search = document.querySelector<HTMLInputElement>('#post-search');
 const items = document.querySelectorAll<HTMLElement>('.post-list-item');

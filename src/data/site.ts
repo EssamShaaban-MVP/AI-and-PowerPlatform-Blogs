@@ -12,6 +12,11 @@ export const site = {
     github: '',
     learnTranscript: 'https://learn.microsoft.com/en-us/users/essamshaaban-4407/transcript/deg5ka2qg3pjj68',
   },
+  // Optional: paste the verification codes from Google Search Console / Bing Webmaster Tools (HTML tag method).
+  seo: {
+    googleSiteVerification: '',
+    bingSiteVerification: '',
+  },
 };
 
 // Microsoft MVP recognition. Keep to verified facts only.

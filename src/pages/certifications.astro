@@ -2,6 +2,7 @@
 import Base from '../layouts/Base.astro';
 import { site, certifications } from '../data/site';
 import MvpBanner from '../components/MvpBanner.astro';
+import { breadcrumbs, personRef } from '../lib/seo';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const badge = (name: string) => `${base}/badges/${name}.svg`;
@@ -22,7 +23,23 @@ const groups = [
   { id: 'other', title: 'Other Microsoft certifications', note: 'AI business and fundamentals credentials', items: other, cols: 4 },
 ];
 ---
-<Base title="Certifications | Essam Shaaban" description="Eight Microsoft certifications, including the Agentic AI Business Solutions Architect Expert, verified on Microsoft Learn.">
+<Base
+  title="Microsoft Certifications | Essam Shaaban"
+  description={`${certifications.length} Microsoft certifications, including the Agentic AI Business Solutions Architect Expert, plus Microsoft MVP recognition — verified on Microsoft Learn.`}
+  image="/og/certifications.jpg"
+  imageAlt="Microsoft Certifications — Essam Shaaban"
+  jsonLd={[
+    breadcrumbs([['Home', '/'], ['Certifications', '/certifications/']]),
+    { ...personRef, hasCredential: certifications.filter(c => c.status === 'active').map(c => ({
+      '@type': 'EducationalOccupationalCredential',
+      name: fullName(c.title),
+      credentialCategory: 'Professional certification',
+      educationalLevel: c.level,
+      recognizedBy: { '@type': 'Organization', name: 'Microsoft', url: 'https://www.microsoft.com' },
+      ...(c.verifyUrl ? { url: c.verifyUrl } : {}),
+    })) },
+  ]}
+>
 <section class="page-heading container cg-heading">
   <span class="eyebrow">MICROSOFT CREDENTIALS / {yearRange}</span>
   <h1>Credentials that reflect<br/><span class="gradient-text">constant curiosity.</span></h1>
@@ -36,7 +53,7 @@ const groups = [
 </section>
 
 <section class="container credentials-page">
-  <MvpBanner />
+  <MvpBanner headingLevel={2} />
 
   {expert.length > 0 && <div class="cg-group" id="expert">
     <div class="cg-group-head"><h2>Expert</h2><span>Highest certification level</span></div>

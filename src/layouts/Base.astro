@@ -1,24 +1,69 @@
 ---
 import '../styles/global.css';
 import { site } from '../data/site';
-const { title = 'Essam Shaaban | AI & Power Platform', description = site.intro } = Astro.props;
+import { abs, graph, website, personRef } from '../lib/seo';
+interface Props {
+  title?: string; description?: string;
+  image?: string; imageAlt?: string;          // site-relative path of a 1200x630 image
+  type?: 'website' | 'article';
+  published?: Date; modified?: Date; tags?: string[]; section?: string;
+  jsonLd?: object[]; noindex?: boolean;
+}
+const {
+  title = 'Essam Shaaban | Microsoft MVP · Power Platform & Agentic AI',
+  description = site.intro,
+  image = '/og/home.jpg',
+  imageAlt = 'Essam Shaaban, Microsoft MVP and Senior Software Engineer',
+  type = 'website', published, modified, tags = [], section, jsonLd = [], noindex = false,
+} = Astro.props;
 const base = import.meta.env.BASE_URL;
 const href = (path: string) => `${base.replace(/\/$/, '')}${path}`;
 const links = [ ['Home','/'], ['About','/#about'], ['Expertise','/#expertise'], ['Work','/#work'], ['Certifications','/certifications/'], ['Blog','/blog/'] ];
 const canonical = new URL(Astro.url.pathname, Astro.site).toString();
-const ogImage = new URL(href('/og-image.jpg'), Astro.site).toString();
+const ogImage = abs(image);
 const current = Astro.url.pathname.replace(base.replace(/\/$/, ''), '') || '/';
 const isCurrent = (path: string) => !path.includes('#') && path !== '/' && current.startsWith(path);
+// Every page carries the WebSite entity; pages add their own entities through `jsonLd`.
+const ld = JSON.stringify(graph(website, ...jsonLd)).replace(/</g, '\\u003c');
+const verify = site.seo ?? {};
 ---
 <!doctype html>
 <html lang="en">
 <head>
 <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#070d1c" />
-<title>{title}</title><meta name="description" content={description} />
-<link rel="canonical" href={canonical} /><link rel="icon" type="image/svg+xml" href={href('/favicon.svg')} />
-<meta property="og:type" content="website" /><meta property="og:title" content={title} /><meta property="og:description" content={description} />
-<meta property="og:url" content={canonical}/><meta property="og:image" content={ogImage} /><meta property="og:image:width" content="1200" /><meta property="og:image:height" content="630" /><meta property="og:image:alt" content="Portrait of Essam Shaaban" /><meta name="twitter:card" content="summary_large_image" /><meta name="twitter:image" content={ogImage} />
+<title>{title}</title>
+<meta name="description" content={description} />
+<meta name="author" content={site.name} />
+<meta name="robots" content={noindex ? 'noindex, nofollow' : 'index, follow, max-image-preview:large'} />
+<link rel="canonical" href={canonical} />
+<link rel="icon" type="image/svg+xml" href={href('/favicon.svg')} />
+<link rel="alternate" type="application/rss+xml" title={`${site.name} — Technical Blog`} href={abs('/rss.xml')} />
+<link rel="sitemap" type="application/xml" href={abs('/sitemap-index.xml')} />
+{verify.googleSiteVerification && <meta name="google-site-verification" content={verify.googleSiteVerification} />}
+{verify.bingSiteVerification && <meta name="msvalidate.01" content={verify.bingSiteVerification} />}
+<meta property="og:site_name" content={site.name} />
+<meta property="og:locale" content="en_US" />
+<meta property="og:type" content={type} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={canonical} />
+<meta property="og:image" content={ogImage} />
+<meta property="og:image:type" content="image/jpeg" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content={imageAlt} />
+{type === 'article' && published && <meta property="article:published_time" content={published.toISOString()} />}
+{type === 'article' && (modified ?? published) && <meta property="article:modified_time" content={(modified ?? published)!.toISOString()} />}
+{type === 'article' && <meta property="article:author" content={personRef.url} />}
+{type === 'article' && section && <meta property="article:section" content={section} />}
+{type === 'article' && tags.map(t => <meta property="article:tag" content={t} />)}
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={ogImage} />
+<meta name="twitter:image:alt" content={imageAlt} />
+<script type="application/ld+json" set:html={ld} />
 <script is:inline>document.documentElement.classList.add('js')</script>
 <link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;450;500;550;600;650;700;750;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" />

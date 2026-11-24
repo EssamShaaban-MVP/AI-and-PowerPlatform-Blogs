@@ -1,13 +1,15 @@
 ---
 import { site, mvp } from '../data/site';
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const { headingLevel = 3 } = Astro.props as { headingLevel?: 2 | 3 };
+const Heading = headingLevel === 2 ? 'h2' : 'h3';
 ---
 <a class="recognition-banner recognition-link" href={site.links.mvp} target="_blank" rel="noopener">
   <div class="recognition-emblem mvp-award"><img src={base + mvp.badge} alt={`Official Microsoft Most Valuable Professional ${mvp.currentAward} award badge`} width="160" height="160" loading="lazy" /></div>
   <div>
     <span class="cert-featured-label mvp-label">Highest recognition</span>
     <span class="tiny-label">MICROSOFT MVP AWARD · {mvp.category.toUpperCase()}</span>
-    <h3>Microsoft Most Valuable Professional</h3>
+    <Heading class="mvp-title">Microsoft Most Valuable Professional</Heading>
     <p>Recognized as a Microsoft Most Valuable Professional (MVP) in {mvp.category} for community contributions, technical knowledge sharing, and supporting the Microsoft technology ecosystem.</p>
     <p class="mvp-explain">The MVP Award is Microsoft's recognition of independent technology experts who share their knowledge and help others get more out of Microsoft technologies.</p>
     <dl class="mvp-facts">
