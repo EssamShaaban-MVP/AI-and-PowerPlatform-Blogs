@@ -1,11 +1,29 @@
 ---
 import Base from '../layouts/Base.astro';
-import { certifications } from '../data/site';
+import { site, certifications } from '../data/site';
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const badge = (name: string) => `${base}/badges/${name}.svg`;
+const verify = site.links.learnTranscript;
+const featured = certifications.find(c => c.featured);
+const others = certifications.filter(c => !c.featured);
+const activeCount = certifications.filter(c => c.status === 'active').length;
 ---
-<Base title="Certifications | Essam Shaaban" description="Eight Microsoft certifications and Microsoft MVP recognition.">
-<section class="page-heading container"><span class="eyebrow">PROFESSIONAL GROWTH / 2022—2026</span><h1>Credentials that reflect<br/><span class="gradient-text">constant curiosity.</span></h1><p>A verified list of eight Microsoft certifications, transcribed from my Microsoft Learn credentials page. Expiry dates are shown where supplied.</p></section>
-<section class="container credentials-page"><div class="recognition-banner"><div class="recognition-emblem">✦</div><div><span class="tiny-label">COMMUNITY RECOGNITION</span><h3>Microsoft Most Valuable Professional</h3><p>Power Platform · Microsoft MVP</p></div><div class="banner-end">MVP <span>↗</span></div></div>
-{['AI & Agentic AI','Power Platform'].map(category=><div class="cert-group"><div class="cert-group-title"><span class="eyebrow">{category.toUpperCase()}</span><span>{certifications.filter(c=>c.category===category).length} CREDENTIALS</span></div><div class="cert-grid">{certifications.filter(c=>c.category===category).map(c=><article class="cert-card"><div class="cert-card-top"><div class:list={['credential-badge',c.tone]}>✧</div><span class="level-pill">{c.level}</span></div><div class="cert-code">{c.code || 'MICROSOFT CERTIFIED'}</div><h2>{c.title}</h2><div class="cert-dates"><span>Earned <strong>{c.earned}</strong></span>{c.expires && <span>Expires <strong>{c.expires}</strong></span>}</div></article>)}</div></div>)}
-<div class="cert-disclaimer">Certification titles and dates are based on the supplied Microsoft Learn screenshot. This site does not independently verify current credential status. Add your public Microsoft Learn transcript link in <code>src/data/site.ts</code> to enable verification.</div>
+<Base title="Certifications | Essam Shaaban" description="Microsoft certifications, including the Agentic AI Business Solutions Architect Expert, and Microsoft MVP recognition — verified on Microsoft Learn.">
+<section class="page-heading container"><span class="eyebrow">PROFESSIONAL GROWTH / 2022—2026</span><h1>Credentials that reflect<br/><span class="gradient-text">constant curiosity.</span></h1><p>{certifications.length} Microsoft certifications earned, {activeCount} currently active. Every credential below can be verified on my public Microsoft Learn transcript.</p>{verify && <div class="page-heading-actions"><a class="button button-primary" href={verify} target="_blank" rel="noopener">Verify on Microsoft Learn <span aria-hidden="true">↗</span></a></div>}</section>
+<section class="container credentials-page">
+{featured && <article class="cert-featured">
+  <div class="cert-featured-badge"><img src={badge(featured.badge)} alt={`Microsoft Certified ${featured.level} badge`} width="200" height="200" /></div>
+  <div class="cert-featured-body">
+    <span class="cert-featured-label">Expert-level certification</span>
+    <div class="cert-code">{featured.code} · MICROSOFT CERTIFIED</div>
+    <h2>{featured.title}</h2>
+    <p>Microsoft's highest certification tier, for architects who design and lead agentic AI business solutions across Microsoft AI, Copilot and Power Platform.</p>
+    <div class="cert-dates"><span>Earned <strong>{featured.earned}</strong></span>{featured.expires && <span>Valid until <strong>{featured.expires}</strong></span>}</div>
+    {verify && <a class="text-link" href={verify} target="_blank" rel="noopener">Verify credential <span aria-hidden="true">↗</span></a>}
+  </div>
+</article>}
+{['AI & Agentic AI','Power Platform'].map(category => { const list = others.filter(c => c.category === category); return <div class="cert-group"><div class="cert-group-title"><span class="eyebrow">{category.toUpperCase()}</span><span>{certifications.filter(c => c.category === category).length} CREDENTIALS</span></div><div class="cert-grid">{list.map(c => <article class:list={['cert-card', c.status === 'expired' && 'is-expired']}><div class="cert-card-top"><img class="cert-badge-img" src={badge(c.badge)} alt={`${c.title} badge`} width="84" height="84" loading="lazy" /><span class:list={['level-pill', c.status === 'expired' && 'pill-expired']}>{c.status === 'expired' ? 'Expired' : c.level}</span></div><div class="cert-code">{c.code}</div><h2>{c.title}</h2><div class="cert-dates"><span>Earned <strong>{c.earned}</strong></span>{c.expires && <span>{c.status === 'expired' ? 'Expired' : 'Expires'} <strong>{c.expires}</strong></span>}</div></article>)}</div></div>; })}
+<a class="recognition-banner recognition-link" href={site.links.mvp} target="_blank" rel="noopener"><div class="recognition-emblem">✦</div><div><span class="tiny-label">COMMUNITY RECOGNITION</span><h3>Microsoft Most Valuable Professional</h3><p>Power Platform · View MVP profile <span aria-hidden="true">↗</span></p></div></a>
+{verify && <div class="cert-disclaimer">Dates and status are taken from my <a href={verify} target="_blank" rel="noopener">Microsoft Learn transcript</a>, which Microsoft keeps up to date. Badge artwork © Microsoft.</div>}
 </section>
 </Base>

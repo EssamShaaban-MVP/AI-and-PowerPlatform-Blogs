@@ -10,18 +10,21 @@ export const site = {
     email: 'essam.shaaban77777@gmail.com',
     mvp: 'https://mvp.microsoft.com/en-US/MVP/profile/480e02e6-5d73-4ace-bf70-43c208560dcd',
     github: '',
+    learnTranscript: 'https://learn.microsoft.com/en-us/users/essamshaaban-4407/transcript/deg5ka2qg3pjj68',
   },
 };
 
+// Verified against the public Microsoft Learn transcript (site.links.learnTranscript).
+// Badges are the official artwork from each certification's Microsoft Learn page, stored in public/badges/.
 export const certifications = [
-  { code: 'AB-410', title: 'Intelligent Applications Builder Associate', level: 'Associate', category: 'AI & Agentic AI', earned: 'Aug 9, 2026', expires: 'Aug 10, 2027', tone: 'blue' },
-  { code: 'AI-103', title: 'Azure AI Apps and Agents Developer Associate', level: 'Associate', category: 'AI & Agentic AI', earned: 'Sep 13, 2026', expires: 'Sep 13, 2027', tone: 'blue' },
-  { code: 'AB-100', title: 'Agentic AI Business Solutions Architect Expert', level: 'Expert', category: 'AI & Agentic AI', earned: 'Oct 12, 2026', expires: 'Oct 11, 2027', tone: 'violet' },
-  { code: 'AB-730', title: 'AI Business Professional', level: 'Professional', category: 'AI & Agentic AI', earned: 'Mar 12, 2026', expires: null, tone: 'rose' },
-  { code: '', title: 'AI Transformation Leader', level: 'Professional', category: 'AI & Agentic AI', earned: 'Mar 2, 2026', expires: null, tone: 'rose' },
-  { code: 'AI-900', title: 'Azure AI Fundamentals', level: 'Fundamentals', category: 'AI & Agentic AI', earned: 'Sep 27, 2025', expires: null, tone: 'cyan' },
-  { code: 'PL-900', title: 'Power Platform Fundamentals', level: 'Fundamentals', category: 'Power Platform', earned: 'Feb 17, 2022', expires: null, tone: 'cyan' },
-  { code: 'PL-100', title: 'Power Platform App Maker Associate', level: 'Associate', category: 'Power Platform', earned: 'Feb 11, 2023', expires: null, tone: 'blue' },
+  { code: 'AB-100', title: 'Agentic AI Business Solutions Architect Expert', level: 'Expert', category: 'AI & Agentic AI', earned: 'Oct 11, 2026', expires: 'Oct 11, 2027', status: 'active', badge: 'microsoft-certified-expert-badge', featured: true },
+  { code: 'AI-103', title: 'Azure AI Apps and Agents Developer Associate', level: 'Associate', category: 'AI & Agentic AI', earned: 'Sep 13, 2026', expires: 'Sep 13, 2027', status: 'active', badge: 'microsoft-certified-associate-badge' },
+  { code: 'AB-410', title: 'Intelligent Applications Builder Associate', level: 'Associate', category: 'AI & Agentic AI', earned: 'Aug 9, 2026', expires: 'Aug 10, 2027', status: 'active', badge: 'microsoft-certified-associate-badge' },
+  { code: 'AB-730', title: 'AI Business Professional', level: 'Professional', category: 'AI & Agentic AI', earned: 'Mar 12, 2026', expires: null, status: 'active', badge: 'ai-business-professional' },
+  { code: 'AB-731', title: 'AI Transformation Leader', level: 'Professional', category: 'AI & Agentic AI', earned: 'Mar 2, 2026', expires: null, status: 'active', badge: 'ai-transformation-leader' },
+  { code: 'AI-900', title: 'Azure AI Fundamentals', level: 'Fundamentals', category: 'AI & Agentic AI', earned: 'Sep 27, 2025', expires: null, status: 'active', badge: 'microsoft-certified-fundamentals-badge' },
+  { code: 'PL-100', title: 'Power Platform App Maker Associate', level: 'Associate', category: 'Power Platform', earned: 'Feb 11, 2023', expires: 'Feb 11, 2024', status: 'expired', badge: 'microsoft-certified-associate-badge' },
+  { code: 'PL-900', title: 'Power Platform Fundamentals', level: 'Fundamentals', category: 'Power Platform', earned: 'Feb 17, 2022', expires: null, status: 'active', badge: 'microsoft-certified-fundamentals-badge' },
 ];
 
 // Public-safe summaries. Replace with approved case studies before publication.
