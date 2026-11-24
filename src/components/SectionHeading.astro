@@ -1,4 +1,5 @@
 ---
 const { eyebrow, title, subtitle, rightText } = Astro.props;
+const [num, label] = eyebrow.includes(' / ') ? eyebrow.split(' / ') : ['', eyebrow];
 ---
-<div class="section-heading"><div><span class="eyebrow">{eyebrow}</span><h2>{title}</h2>{subtitle && <p>{subtitle}</p>}</div>{rightText && <span class="section-side">{rightText}</span>}</div>
+<div class="section-heading"><div><span class="eyebrow section-eyebrow">{num && <span class="section-num">{num}</span>}{label}</span><h2>{title}</h2>{subtitle && <p>{subtitle}</p>}</div>{rightText && <span class="section-side">{rightText}</span>}</div>
