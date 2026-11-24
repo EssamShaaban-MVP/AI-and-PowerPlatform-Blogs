@@ -13,17 +13,27 @@ const homeCerts = certifications.filter(c => !c.featured && c.status === 'active
 const posts = (await getCollection('blog', ({data}) => !data.draft)).sort((a,b)=>b.data.date.valueOf()-a.data.date.valueOf()).slice(0,3);
 ---
 <Base>
-<section class="hero container">
-  <div class="hero-decoration hero-decoration-one"></div><div class="hero-decoration hero-decoration-two"></div>
-  <div class="hero-left">
-    <p class="hero-overline">HELLO, I'M ESSAM SHAABAN <span class="overline-rule"></span></p>
-    <h1>Building the<br/><span class="gradient-text">next generation</span><br/>of enterprise AI.</h1>
-    <p class="hero-intro">{site.intro}</p>
-    <ul class="hero-proof"><li class="proof-mvp"><img src={badge('microsoft-mvp')} alt="" width="18" height="18" />Microsoft MVP</li><li>8 Microsoft certifications</li><li>Senior Software Engineer</li><li>Power Platform &amp; Agentic AI</li></ul>
-    <div class="hero-actions"><a class="button button-primary" href="#work">Explore my work <span aria-hidden="true">→</span></a><a class="button button-secondary" href={url('/blog/')}>Read the blog <span aria-hidden="true">→</span></a></div>
-    <div class="hero-bottom"><span><span class="mini-icon">⌖</span> {site.location}</span></div>
+<section class="hx" aria-labelledby="hx-title">
+  <div class="container hx-inner">
+    <div class="hx-copy">
+      <p class="hx-eyebrow">Essam Shaaban</p>
+      <h1 id="hx-title">Architecting <span class="hx-accent">Intelligent</span> Enterprise Solutions</h1>
+      <p class="hx-intro">Microsoft MVP and Senior Software Engineer focused on building secure, scalable business applications and exploring enterprise Agentic AI architectures across Microsoft Power Platform, Microsoft Foundry, and connected data platforms.</p>
+      <a class="hx-mvp" href={site.links.mvp} target="_blank" rel="noopener">
+        <img src={url('/badges/microsoft-mvp-2026-2027-128.webp')} alt="" width="56" height="56" />
+        <span><strong>Microsoft Most Valuable Professional</strong><small>Business Applications · 2026–2027</small></span>
+        <span class="hx-mvp-arrow" aria-hidden="true">↗</span>
+      </a>
+      <div class="hx-actions">
+        <a class="button button-primary" href="#work">Explore My Work <span aria-hidden="true">→</span></a>
+        <a class="button button-secondary" href={url('/blog/')}>Read Technical Blog <span aria-hidden="true">→</span></a>
+      </div>
+      <p class="hx-meta">Senior Software Engineer <span aria-hidden="true">·</span> {site.location}</p>
+    </div>
+    <div class="hx-visual">
+      <img class="hx-portrait" src={url('/essam-shaaban-cutout.webp')} srcset={`${url('/essam-shaaban-cutout-600.webp')} 600w, ${url('/essam-shaaban-cutout.webp')} 1040w`} sizes="(max-width: 900px) min(440px, 88vw), 560px" alt="Portrait of Essam Shaaban" width="1040" height="891" fetchpriority="high" decoding="async" />
+    </div>
   </div>
-  <div class="hero-right"><div class="hero-portrait"><img src={url('/essam-shaaban-cutout.webp')} alt="Portrait of Essam Shaaban" width="1040" height="891" fetchpriority="high" /></div></div>
 </section>
 <section class="section container" id="about"><SectionHeading eyebrow="01 / ABOUT ME" title="Engineering with purpose." subtitle="From business problems to scalable digital experiences."/><div class="about-grid"><div class="about-quote"><span class="quote-symbol">“</span><p>Technology should make complex work feel <em>simple.</em></p><div class="quote-foot">— My engineering philosophy</div></div><div class="about-copy"><p>I'm a Senior Software Engineer and Microsoft MVP in Business Applications, specializing in the Microsoft Power Platform and the evolving agentic AI ecosystem.</p><p>My work focuses on secure architecture, thoughtful user experiences, data integration, and automation that supports real operational outcomes.</p><p>Outside delivery work, I share hands-on technical writing, architecture patterns, and lessons learned with the Microsoft community.</p><a href={url('/certifications/')} class="text-link">Explore certifications <span aria-hidden="true">→</span></a></div></div></section>
 <ExpertiseSection />
