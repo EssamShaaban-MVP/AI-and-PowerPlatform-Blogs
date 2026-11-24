@@ -42,8 +42,8 @@ export const certifications = [
 
 // Public-safe summaries. Replace with approved case studies before publication.
 export const projects = [
-  { number: '01', type: 'Agentic AI / Architecture', title: 'Enterprise AI Solution Assessment', description: 'Evaluating agent frameworks, data access patterns and governance tradeoffs to choose the right technology for each business scenario.', tags: ['Microsoft Foundry', 'Copilot Studio', 'Architecture'], icon: '✦' },
-  { number: '02', type: 'Power Platform / Business Apps', title: 'Faculty Workflow Modernization', description: 'A multi-stage digital approval experience that makes complex review processes easier to navigate, audit and maintain.', tags: ['Power Apps', 'Dataverse', 'Power Automate'], icon: '◈' },
-  { number: '03', type: 'AI / Integration', title: 'Data-grounded Agent Prototypes', description: 'Exploring secure integration patterns between agent experiences, enterprise data sources and low-code front ends.', tags: ['Azure AI', 'Databricks', 'Logic Apps'], icon: '◎' },
-  { number: '04', type: 'Automation / Scale', title: 'Document Processing at Scale', description: 'Automating document conversion and orchestration with operational visibility and exception handling.', tags: ['Power Automate', 'SharePoint', 'Integration'], icon: '▧' },
+  { number: '01', type: 'Agentic AI / Architecture', title: 'Enterprise AI Solution Assessment', description: 'Evaluating agent frameworks, data access patterns and governance tradeoffs to choose the right technology for each business scenario.', tags: ['Microsoft Foundry', 'Copilot Studio', 'Architecture'], icon: 'sparkles' },
+  { number: '02', type: 'Power Platform / Business Apps', title: 'Faculty Workflow Modernization', description: 'A multi-stage digital approval experience that makes complex review processes easier to navigate, audit and maintain.', tags: ['Power Apps', 'Dataverse', 'Power Automate'], icon: 'workflow' },
+  { number: '03', type: 'AI / Integration', title: 'Data-grounded Agent Prototypes', description: 'Exploring secure integration patterns between agent experiences, enterprise data sources and low-code front ends.', tags: ['Azure AI', 'Databricks', 'Logic Apps'], icon: 'network' },
+  { number: '04', type: 'Automation / Scale', title: 'Document Processing at Scale', description: 'Automating document conversion and orchestration with operational visibility and exception handling.', tags: ['Power Automate', 'SharePoint', 'Integration'], icon: 'files' },
 ];
