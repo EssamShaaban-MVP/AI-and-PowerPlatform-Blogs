@@ -5,7 +5,7 @@ import { site, mvp } from '../data/site';
 const SITE = (import.meta.env.SITE as string | undefined) ?? 'https://example.github.io';
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, '');
 
-/** Absolute URL for a site-relative path, e.g. abs('/blog/') -> https://host/base/blog/ */
+/** Absolute URL for a site-relative path, e.g. abs('/about/') -> https://host/base/about/ */
 export const abs = (path = '/') => new URL(BASE + (path.startsWith('/') ? path : '/' + path), SITE).toString();
 
 export const homeUrl = abs('/');

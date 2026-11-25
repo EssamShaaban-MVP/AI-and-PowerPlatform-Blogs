@@ -74,7 +74,6 @@ Open http://localhost:4321/. Locally the site is served from `/`; in production 
     ├── pages/
     │   ├── index.astro            # Home
     │   ├── certifications.astro   # Certifications gallery
-    │   ├── blog/index.astro       # Blog list with search + category filters
     │   ├── blog/[slug].astro      # Article page (one per Markdown file)
     │   ├── rss.xml.js             # RSS feed
     │   └── robots.txt.ts          # robots.txt with sitemap location

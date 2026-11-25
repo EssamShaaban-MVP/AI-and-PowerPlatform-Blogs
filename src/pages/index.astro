@@ -7,7 +7,11 @@ import { site, mvp } from '../data/site';
 import { getCollection } from 'astro:content';
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const url = (s: string) => base + s;
-const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf()).slice(0, 3);
+const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+// Every article is on the page; they are shown PAGE at a time with page buttons.
+const PAGE = 6;
+const categories = [...new Set(posts.map(p => p.data.category))].sort();
+const tags = [...new Set(posts.flatMap(p => p.data.tags))].sort((a, b) => a.localeCompare(b));
 ---
 <Base
   title="Essam Shaaban | Microsoft MVP · Power Platform & Agentic AI"
@@ -29,7 +33,7 @@ const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort((a, 
       </a>
       <div class="hx-actions">
         <a class="button button-primary" href={url('/projects/')}>Explore My Work <span aria-hidden="true">→</span></a>
-        <a class="button button-secondary" href={url('/blog/')}>Read Technical Blog <span aria-hidden="true">→</span></a>
+        <a class="button button-secondary" href={url('/#writing')}>Read Technical Blog <span aria-hidden="true">→</span></a>
       </div>
       <p class="hx-meta">Senior Software Engineer <span aria-hidden="true">·</span> {site.location}</p>
     </div>
@@ -40,5 +44,86 @@ const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort((a, 
 </section>
 <section class="section container" id="about"><div class="about-grid"><div class="about-quote"><span class="quote-symbol">“</span><p>Technology should make complex work feel <em>simple.</em></p><div class="quote-foot">— My engineering philosophy</div></div><div class="about-copy"><p>I'm a Senior Software Engineer and Microsoft MVP in Business Applications, specializing in the Microsoft Power Platform and the evolving agentic AI ecosystem.</p><p>My work focuses on secure architecture, thoughtful user experiences, data integration, and automation that supports real operational outcomes.</p><a href={url('/about/')} class="text-link">More about me <span aria-hidden="true">→</span></a></div></div></section>
 
-<section class="section container" id="writing"><SectionHeading eyebrow="01 / TECHNICAL WRITING" title="Power Platform & AI, in writing." subtitle="Hands-on guides and architecture notes from my blog on Power Apps, Power Automate, Dataverse and agentic AI."/><div class="bgrid">{posts.map(post => <BlogCard post={post} tags={false} />)}</div><div class="center-action"><a class="button button-secondary" href={url('/blog/')}>Browse all articles <span aria-hidden="true">→</span></a></div></section>
+<section class="section container" id="writing">
+  <SectionHeading eyebrow="01 / TECHNICAL WRITING" title="Power Platform & AI, in writing." subtitle="Hands-on guides and architecture notes from my blog on Power Apps, Power Automate, Dataverse and agentic AI."/>
+  <div class="blog-controls">
+    <div class="blog-controls-row">
+      <label class="blog-search"><span aria-hidden="true">⌕</span><input type="search" id="home-search" placeholder="Search titles, topics and tags..." aria-label="Search articles" /></label>
+      <label class="blog-select"><span>Topic</span>
+        <select id="home-tag" aria-label="Filter by topic tag"><option value="">All topics</option>{tags.map(t => <option value={t.toLowerCase()}>{t}</option>)}</select>
+      </label>
+    </div>
+    <div class="category-filters" role="group" aria-label="Filter articles by category">
+      <button class="filter-button active" type="button" data-category="All" aria-pressed="true">All <small>{posts.length}</small></button>
+      {categories.map(c => <button class="filter-button" type="button" data-category={c} aria-pressed="false">{c} <small>{posts.filter(p => p.data.category === c).length}</small></button>)}
+    </div>
+    <div class="blog-status"><span id="home-count" role="status" aria-live="polite">Showing 1–{Math.min(PAGE, posts.length)} of {posts.length} articles</span><button type="button" class="blog-clear" id="home-clear" hidden>Clear filters</button>
+      <div class="view-toggle" role="group" aria-label="Article layout">
+        <button type="button" class="view-btn active" data-view="grid" aria-pressed="true"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M3 3h8v8H3zm10 0h8v8h-8zM3 13h8v8H3zm10 0h8v8h-8z"/></svg>Grid</button>
+        <button type="button" class="view-btn" data-view="list" aria-pressed="false"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M3 4h18v3H3zm0 6.5h18v3H3zM3 17h18v3H3z"/></svg>List</button>
+      </div>
+    </div>
+  </div>
+  <div class="bgrid" id="home-posts">{posts.map((post, i) => <BlogCard post={post} tags={false} eager={i < 3} />)}</div>
+  <p id="home-empty" class="empty-results" hidden>No matching articles. Try another search, topic or category.</p>
+  <nav class="pager" id="home-pager" aria-label="Article pages" hidden></nav>
+</section>
+<script is:inline define:vars={{ PAGE }}>
+(function () {
+  var list = document.getElementById('home-posts');
+  var items = Array.prototype.slice.call(list.querySelectorAll('.bcard'));
+  var buttons = document.querySelectorAll('#writing .filter-button');
+  var search = document.getElementById('home-search'), tagSel = document.getElementById('home-tag');
+  var count = document.getElementById('home-count'), empty = document.getElementById('home-empty');
+  var pager = document.getElementById('home-pager'), clear = document.getElementById('home-clear');
+  var category = 'All', page = 1;
+  function pagerHtml(pages) {
+    var h = '<button type="button" class="pg-btn" data-page="' + (page - 1) + '"' + (page === 1 ? ' disabled' : '') + ' aria-label="Previous page">&larr; Prev</button>';
+    for (var i = 1; i <= pages; i++) {
+      h += '<button type="button" class="pg-btn pg-num' + (i === page ? ' active' : '') + '" data-page="' + i + '"' + (i === page ? ' aria-current="page"' : '') + ' aria-label="Page ' + i + '">' + i + '</button>';
+    }
+    return h + '<button type="button" class="pg-btn" data-page="' + (page + 1) + '"' + (page === pages ? ' disabled' : '') + ' aria-label="Next page">Next &rarr;</button>';
+  }
+  function update() {
+    var term = search.value.toLowerCase().trim(), tag = tagSel.value;
+    var match = items.filter(function (el) {
+      return (category === 'All' || el.dataset.category === category) &&
+        (!tag || (el.dataset.tags || '').split('|').indexOf(tag) > -1) &&
+        (el.dataset.search || '').indexOf(term) > -1;
+    });
+    var pages = Math.max(1, Math.ceil(match.length / PAGE));
+    if (page > pages) page = pages;
+    var from = (page - 1) * PAGE, to = from + PAGE;
+    items.forEach(function (el) { var i = match.indexOf(el); el.hidden = !(i >= from && i < to); });
+    buttons.forEach(function (b) { var on = b.dataset.category === category; b.classList.toggle('active', on); b.setAttribute('aria-pressed', String(on)); });
+    count.textContent = match.length ? 'Showing ' + (from + 1) + '–' + Math.min(to, match.length) + ' of ' + match.length + (match.length === 1 ? ' article' : ' articles') : 'No articles';
+    empty.hidden = match.length > 0;
+    pager.hidden = pages < 2;
+    pager.innerHTML = pages < 2 ? '' : pagerHtml(pages);
+    clear.hidden = !(category !== 'All' || term || tag);
+  }
+  var viewBtns = document.querySelectorAll('#writing .view-btn');
+  function setView(v) {
+    list.classList.toggle('is-list', v === 'list');
+    viewBtns.forEach(function (b) { var on = b.dataset.view === v; b.classList.toggle('active', on); b.setAttribute('aria-pressed', String(on)); });
+    try { localStorage.setItem('blog-view', v); } catch (e) {}
+  }
+  viewBtns.forEach(function (b) { b.addEventListener('click', function () { setView(b.dataset.view); }); });
+  try { if (localStorage.getItem('blog-view') === 'list') setView('list'); } catch (e) {}
+  function reset() { page = 1; update(); }
+  buttons.forEach(function (b) { b.addEventListener('click', function () { category = b.dataset.category || 'All'; reset(); }); });
+  search.addEventListener('input', reset);
+  tagSel.addEventListener('input', reset);
+  clear.addEventListener('click', function () { category = 'All'; search.value = ''; tagSel.value = ''; reset(); });
+  pager.addEventListener('click', function (e) {
+    var b = e.target.closest('.pg-btn');
+    if (!b || b.disabled) return;
+    page = Number(b.dataset.page);
+    update();
+    var top = document.getElementById('home-posts').getBoundingClientRect().top + window.scrollY - 150;
+    window.scrollTo({ top: top, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+  });
+  update();
+})();
+</script>
 </Base>

@@ -19,9 +19,10 @@ const date = d.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric'
 >
   <div class="bcard-media">
     <img src={coverSrc(post)} alt="" width="1200" height="630" loading={eager ? 'eager' : 'lazy'} decoding="async" />
+    <time class="bcard-date" datetime={d.date.toISOString().slice(0, 10)}>{date}</time>
   </div>
   <div class="bcard-body">
-    <div class="post-meta"><span class="bcard-cat">{d.category}</span><time datetime={d.date.toISOString().slice(0, 10)}>{date}</time><span>{d.readingMinutes ?? 5} MIN READ</span></div>
+    <div class="post-meta"><span class="bcard-cat">{d.category}</span><span>{d.readingMinutes ?? 5} MIN READ</span></div>
     <Heading>{d.title}</Heading>
     <p>{d.description}</p>
     {tags && d.tags.length > 0 && <div class="tag-row">{d.tags.slice(0, 3).map((t: string) => <span>{t}</span>)}</div>}
