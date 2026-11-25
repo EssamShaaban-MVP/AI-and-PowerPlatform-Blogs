@@ -1,0 +1,92 @@
+/* Multi-page additions: navigation fit, info cards, page-level helpers.
+   Reuses the existing theme tokens so both themes keep working. */
+
+/* Seven primary links need the compact (menu) navigation a little earlier than before. */
+@media(max-width:1120px){
+  .desktop-nav,.nav-cta{display:none}
+  .menu-toggle{display:block}
+  .theme-toggle{margin-left:auto}
+  .theme-toggle+.menu-toggle{margin-left:-18px}
+}
+@media(min-width:1121px){.desktop-nav{gap:22px}}
+.mobile-nav a[aria-current=page]{color:var(--c-83d5ff)}
+
+/* Info cards: compact link cards used for focus areas and "next steps". */
+.info-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+.info-card{display:flex;flex-direction:column;padding:28px;border:1px solid var(--line);background:linear-gradient(165deg,var(--card-a),var(--card-b));border-radius:var(--r-card);box-shadow:var(--shadow-card);transition:transform .25s var(--ease),border-color .25s ease,box-shadow .25s ease}
+.info-card:hover{transform:translateY(-3px);border-color:var(--line-hover);box-shadow:var(--shadow-hover)}
+.js .info-card.in:hover{transform:translateY(-3px)}
+.info-card h3{font-size:21px;line-height:1.3;letter-spacing:-.02em;color:var(--text-1);margin:10px 0 10px}
+.info-card p{font-size:15px;line-height:1.65;color:var(--text-2);margin:0 0 22px}
+.info-card .text-link{margin-top:auto}
+.info-logo{display:inline-flex;width:56px;height:56px;align-items:center;justify-content:center;margin-bottom:16px;border-radius:14px;background:var(--c-111e31);border:1px solid var(--line)}
+.info-logo img{width:36px;height:36px}
+:root[data-theme="light"] .info-logo{background:#fff}
+@media(max-width:960px){.info-grid{grid-template-columns:1fr;max-width:640px}}
+
+/* Projects page uses an h2 under the page h1; keep the card heading look. */
+.project-card .project-title{font-size:21px;line-height:1.3;letter-spacing:-.02em;color:var(--text-1);margin:0 0 8px}
+
+/* Page-level spacing */
+.page-heading+.section{padding-top:clamp(48px,6vw,80px)}
+.next-steps{padding-top:0}
+.info-grid+.cert-actions{margin-top:36px}
+
+/* Pointer from Credentials to the MVP banner on the Community page */
+.mvp-pointer{display:flex;flex-wrap:wrap;gap:6px 18px;align-items:center;justify-content:space-between;margin:0 0 8px;padding:16px 22px;border:1px solid var(--line);border-radius:var(--r-card);background:linear-gradient(165deg,var(--card-a),var(--card-b));color:var(--text-2);font-size:15px;transition:border-color .25s ease}
+.mvp-pointer:hover{border-color:var(--line-hover)}
+
+/* Blog: filter bar */
+.blog-head-actions{display:flex;flex-wrap:wrap;gap:12px}
+.blog-controls{display:flex;flex-direction:column;gap:16px;margin:34px 0}
+.blog-controls-row{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:14px;align-items:stretch}
+.blog-controls .blog-search{min-width:0;width:auto}
+.blog-select{display:flex;align-items:center;gap:10px;padding:0 6px 0 14px;border:1px solid var(--c-2a4057);border-radius:6px;background:var(--c-111d30);color:var(--c-6da6ca);font-size:12px}
+.blog-select select{background:transparent;border:0;outline:0;color:var(--c-e9f3ff);font:inherit;font-size:13px;padding:11px 8px 11px 0;cursor:pointer;max-width:200px}
+.blog-select select option{background:var(--c-111d30);color:var(--c-e9f3ff)}
+.blog-select:focus-within,.blog-search:focus-within{border-color:var(--c-397bab)}
+.filter-button{font-size:13px}
+.filter-button small{opacity:.7;margin-left:4px;font-size:11px}
+.blog-status{display:flex;align-items:center;gap:16px;font-size:13px;color:var(--text-2);min-height:24px}
+.blog-clear{background:none;border:0;color:var(--c-83d5ff);font-size:13px;font-weight:700;padding:0;text-decoration:underline;text-underline-offset:3px}
+.blog-clear[hidden]{display:none}
+@media(max-width:760px){.blog-controls-row{grid-template-columns:1fr 1fr}.blog-controls-row .blog-search{grid-column:1/-1}.blog-select select{max-width:none;width:100%}}
+
+/* Imported long-form articles: keep images, tables and code inside the reading column. */
+.article-layout>*{min-width:0}
+.article-prose{min-width:0;overflow-wrap:break-word}
+.article-prose img{display:block;max-width:100%;height:auto;margin:1.5rem auto;border-radius:10px;border:1px solid var(--line)}
+.article-prose table{display:block;max-width:100%;overflow-x:auto;border-collapse:collapse;margin:1.5rem 0;font-size:.95em}
+.article-prose th,.article-prose td{border:1px solid var(--line);padding:8px 12px;text-align:left;vertical-align:top}
+.article-prose th{background:var(--card-a)}
+.article-prose pre{max-width:100%;overflow-x:auto}
+.article-prose :not(pre)>code{overflow-wrap:anywhere}
+
+/* Blog cards: cover image + excerpt (Home, Blog index, "Keep reading") */
+.bgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}
+.bcard{display:flex;flex-direction:column;overflow:hidden;border:1px solid var(--line);border-radius:var(--r-card);background:linear-gradient(165deg,var(--card-a),var(--card-b));box-shadow:var(--shadow-card);transition:transform .25s var(--ease),border-color .25s ease,box-shadow .25s ease}
+.bcard[hidden]{display:none}
+.bcard:hover{transform:translateY(-3px);border-color:var(--line-hover);box-shadow:var(--shadow-hover)}
+.js .bcard.in:hover{transform:translateY(-3px)}
+.bcard-media{position:relative;aspect-ratio:16/9;overflow:hidden;background:#0d1d39;border-bottom:1px solid var(--line)}
+.bcard-media img{display:block;width:100%;height:100%;object-fit:cover;object-position:top center;transition:transform .5s var(--ease)}
+.bcard:hover .bcard-media img{transform:scale(1.04)}
+.bcard-cat{color:var(--c-83d5ff)}
+.bcard-body{display:flex;flex:1;flex-direction:column;gap:10px;padding:20px 22px 22px}
+.bcard-body .post-meta{margin:0}
+.bcard h2,.bcard h3{margin:0;font-size:19px;line-height:1.35;letter-spacing:-.02em;color:var(--text-1);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.bcard p{margin:0;font-size:14.5px;line-height:1.65;color:var(--text-2);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.bcard .tag-row{margin-top:2px}
+.bcard .text-link{margin-top:auto;padding-top:8px}
+@media(max-width:1000px){.bgrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:640px){.bgrid{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){.bcard,.bcard-media img{transition:none}.bcard:hover{transform:none}.bcard:hover .bcard-media img{transform:none}}
+
+/* Article page: cover image + "Keep reading" */
+.article-cover{margin:0 0 36px}
+.article-cover img{display:block;width:100%;max-height:460px;object-fit:cover;object-position:top center;border-radius:var(--r-card);border:1px solid var(--line);box-shadow:var(--shadow-card)}
+.related{padding:72px 0 24px}
+.related-head{display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin-bottom:24px}
+.related-head h2{margin:0;font-size:clamp(24px,2.6vw,32px);letter-spacing:-.03em;color:var(--text-1)}
+
+.toc .toc-sub{padding-left:14px;font-size:.92em;opacity:.9}

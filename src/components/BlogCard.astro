@@ -1,0 +1,30 @@
+---
+// Article card: cover image, category, date, title, excerpt and tags. Used on the Home page, the Blog index
+// (where the data-* attributes drive the client-side filters) and in "More articles" on each post.
+import { coverSrc, postUrl } from '../data/blog';
+interface Props { post: any; headingLevel?: 2 | 3; eager?: boolean; tags?: boolean }
+const { post, headingLevel = 3, eager = false, tags = true } = Astro.props;
+const d = post.data;
+const Heading = headingLevel === 2 ? 'h2' : 'h3';
+const date = d.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
+---
+<a
+  class="bcard"
+  href={postUrl(post.id)}
+  data-category={d.category}
+  data-tags={d.tags.map((t: string) => t.toLowerCase()).join('|')}
+  data-date={d.date.toISOString()}
+  data-read={d.readingMinutes ?? 5}
+  data-search={`${d.title} ${d.description} ${d.category} ${d.tags.join(' ')}`.toLowerCase()}
+>
+  <div class="bcard-media">
+    <img src={coverSrc(post)} alt="" width="1200" height="630" loading={eager ? 'eager' : 'lazy'} decoding="async" />
+  </div>
+  <div class="bcard-body">
+    <div class="post-meta"><span class="bcard-cat">{d.category}</span><time datetime={d.date.toISOString().slice(0, 10)}>{date}</time><span>{d.readingMinutes ?? 5} MIN READ</span></div>
+    <Heading>{d.title}</Heading>
+    <p>{d.description}</p>
+    {tags && d.tags.length > 0 && <div class="tag-row">{d.tags.slice(0, 3).map((t: string) => <span>{t}</span>)}</div>}
+    <span class="text-link">Read article <span aria-hidden="true">→</span></span>
+  </div>
+</a>

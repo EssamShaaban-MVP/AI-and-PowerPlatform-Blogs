@@ -1,0 +1,19 @@
+---
+import Base from '../../layouts/Base.astro';
+import ExpertiseSection from '../../components/ExpertiseSection.astro';
+import { breadcrumbs } from '../../lib/seo';
+---
+<Base
+  title="Expertise: Agentic AI, Power Platform & Azure Integration | Essam Shaaban"
+  description="Architecture depth across agentic AI and Copilots, Microsoft Power Platform, and secure Azure integration: Foundry, Copilot Studio, Dataverse, Logic Apps, Entra ID and more."
+  image="/og/home.jpg"
+  imageAlt="Expertise — Essam Shaaban"
+  jsonLd={[breadcrumbs([['Home', '/'], ['Expertise', '/expertise/']])]}
+>
+<section class="page-heading container">
+  <span class="eyebrow">WHAT I DO</span>
+  <h1>Built for the<br/><span class="gradient-text">real world.</span></h1>
+  <p>Architecture depth across agentic AI, Power Platform and Azure integration.</p>
+</section>
+<section class="section container" id="expertise"><ExpertiseSection /></section>
+</Base>

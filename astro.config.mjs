@@ -7,6 +7,8 @@ export default defineConfig({
   site: process.env.SITE_URL || 'https://example.github.io',
   base: process.env.BASE_PATH || '/',
   integrations: [sitemap()],
+  // The Certifications page is now Credentials; keep the old URL working (static meta-refresh page on GitHub Pages).
+  redirects: { '/certifications': `${(process.env.BASE_PATH || '/').replace(/\/$/, '')}/credentials/` },
   // three.js (~185 KB gzip) is only loaded on demand by the About-section robot (dynamic import),
   // so its large chunk never blocks page load; raise the warning threshold accordingly.
   vite: { build: { chunkSizeWarningLimit: 800 } },

@@ -5,6 +5,8 @@ import '@fontsource/jetbrains-mono/400.css';
 import fontLatin from '@fontsource-variable/urbanist/files/urbanist-latin-wght-normal.woff2?url';
 import '../styles/theme.css';
 import '../styles/global.css';
+import '../styles/pages.css';
+import ContactCta from '../components/ContactCta.astro';
 import { site } from '../data/site';
 import { abs, graph, website, personRef } from '../lib/seo';
 interface Props {
@@ -13,21 +15,23 @@ interface Props {
   type?: 'website' | 'article';
   published?: Date; modified?: Date; tags?: string[]; section?: string;
   jsonLd?: object[]; noindex?: boolean;
+  contact?: boolean;                          // render the shared "Let's connect" band (default true)
 }
 const {
   title = 'Essam Shaaban | Microsoft MVP · Power Platform & Agentic AI',
   description = site.intro,
   image = '/og/home.jpg',
   imageAlt = 'Essam Shaaban, Microsoft MVP and Senior Software Engineer',
-  type = 'website', published, modified, tags = [], section, jsonLd = [], noindex = false,
+  type = 'website', published, modified, tags = [], section, jsonLd = [], noindex = false, contact = true,
 } = Astro.props;
 const base = import.meta.env.BASE_URL;
 const href = (path: string) => `${base.replace(/\/$/, '')}${path}`;
-const links = [ ['Home','/'], ['About','/#about'], ['Expertise','/#expertise'], ['Work','/#work'], ['Certifications','/certifications/'], ['Blog','/blog/'] ];
+const links = [ ['Home','/'], ['About','/about/'], ['Expertise','/expertise/'], ['Projects','/projects/'], ['Community','/community/'], ['Credentials','/credentials/'], ['Blog','/blog/'] ];
 const canonical = new URL(Astro.url.pathname, Astro.site).toString();
 const ogImage = abs(image);
 const current = Astro.url.pathname.replace(base.replace(/\/$/, ''), '') || '/';
-const isCurrent = (path: string) => !path.includes('#') && path !== '/' && current.startsWith(path);
+const isCurrent = (path: string) => path === '/' ? current === '/' : current.startsWith(path);
+const contactHref = contact ? '#contact' : href('/#contact');
 // Every page carries the WebSite entity; pages add their own entities through `jsonLd`.
 const ld = JSON.stringify(graph(website, ...jsonLd)).replace(/</g, '\\u003c');
 const verify = site.seo ?? {};
@@ -88,7 +92,7 @@ const verify = site.seo ?? {};
   <div class="header-bar"><header class="header container">
     <a class="brand" href={href('/')} aria-label="Essam Shaaban home"><span class="brand-mark">E<span>.</span></span><span class="brand-label">ESSAM<span class="brand-muted"> / SHAABAN</span></span></a>
     <nav class="desktop-nav" aria-label="Primary navigation">{links.map(([name,path]) => <a href={href(path)} aria-current={isCurrent(path) ? 'page' : undefined}>{name}</a>)}</nav>
-    <a class="nav-cta" href={href('/#contact')}>Let's connect <span aria-hidden="true">→</span></a>
+    <a class="nav-cta" href={contactHref}>Let's connect <span aria-hidden="true">→</span></a>
     <button class="theme-toggle" type="button" aria-pressed="true" aria-label="Dark theme" title="Switch to light theme">
       <span class="tt-track" aria-hidden="true">
         <svg class="tt-end tt-end-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.2M12 19.3v2.2M4.6 4.6l1.6 1.6M17.8 17.8l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.6 19.4l1.6-1.6M17.8 6.2l1.6-1.6"/></svg>
@@ -101,8 +105,9 @@ const verify = site.seo ?? {};
     </button>
     <button class="menu-toggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu"><span></span><span></span><span></span></button>
   </header>
-  <nav id="mobile-menu" class="mobile-nav container" aria-label="Mobile navigation" hidden>{links.map(([name,path]) => <a href={href(path)}>{name}</a>)}<a href={href('/#contact')}>Contact</a></nav></div>
+  <nav id="mobile-menu" class="mobile-nav container" aria-label="Mobile navigation" hidden>{links.map(([name,path]) => <a href={href(path)} aria-current={isCurrent(path) ? 'page' : undefined}>{name}</a>)}<a href={contactHref}>Contact</a></nav></div>
   <main id="main" tabindex="-1"><slot /></main>
+  {contact && <ContactCta />}
   <footer class="footer"><div class="footer-simple">
     <span class="footer-copy">© {new Date().getFullYear()} Essam Shaaban</span>
   </div></footer>
@@ -128,7 +133,7 @@ toggle?.addEventListener('click', () => {
   try { localStorage.setItem('theme', next); } catch {}
   applyTheme(next);
 });
-const targets = document.querySelectorAll<HTMLElement>('.section-heading, .about-grid > *, .expertise-card, .project-card, .cert-featured, .credential-mini, .recognition-banner, .cert-actions, .blog-card, .center-action, .cert-group-title, .cert-card, .cert-disclaimer, .contact-inner, .cg-group-head, .cg-card');
+const targets = document.querySelectorAll<HTMLElement>('.section-heading, .about-grid > *, .bcard, .expertise-card, .project-card, .cert-featured, .credential-mini, .explore-card, .info-card, .about-band, .recognition-banner, .cert-actions, .blog-card, .center-action, .cert-group-title, .cert-card, .cert-disclaimer, .contact-inner, .cg-group-head, .cg-card');
 if ('IntersectionObserver' in window && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
   const io = new IntersectionObserver(entries => entries.forEach(e => { if (e.isIntersecting) { const t = e.target as HTMLElement; t.classList.add('in'); io.unobserve(t); setTimeout(() => { t.style.transitionDelay = ''; }, 1200); } }), { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
   targets.forEach(el => { const sibs = el.parentElement ? Array.from(el.parentElement.children) : []; el.style.transitionDelay = `${Math.min(sibs.indexOf(el), 4) * 70}ms`; el.classList.add('reveal'); io.observe(el); });

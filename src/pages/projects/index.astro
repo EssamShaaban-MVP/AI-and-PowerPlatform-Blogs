@@ -1,0 +1,24 @@
+---
+import Base from '../../layouts/Base.astro';
+import Icon from '../../components/Icon.astro';
+import { projects } from '../../data/site';
+import { breadcrumbs } from '../../lib/seo';
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+<Base
+  title="Selected Projects & Solution Themes | Essam Shaaban"
+  description="Representative architecture and solution themes across enterprise AI assessment, Power Platform workflow modernization, data-grounded agents and document automation."
+  image="/og/home.jpg"
+  imageAlt="Selected projects — Essam Shaaban"
+  jsonLd={[breadcrumbs([['Home', '/'], ['Projects', '/projects/']])]}
+>
+<section class="page-heading container">
+  <span class="eyebrow">SELECTED PROJECTS / 2024—2026</span>
+  <h1>Ideas into<br/><span class="gradient-text">impact.</span></h1>
+  <p>Representative architecture and solution themes. Internal details are intentionally omitted.</p>
+</section>
+<section class="section container" id="work">
+  <div class="projects-grid">{projects.map((p, i) => <article class="project-card"><div class="project-top"><span>{p.number} / {p.type}</span></div><div class="project-art" class:list={['art-' + i]}><Icon name={p.icon} /><div class="art-line"></div></div><h2 class="project-title">{p.title}</h2><p>{p.description}</p><div class="tag-row">{p.tags.map(tag => <span>{tag}</span>)}</div></article>)}</div>
+  <div class="center-action"><a class="button button-secondary" href={base + '/blog/'}>Read the technical write-ups <span aria-hidden="true">→</span></a></div>
+</section>
+</Base>

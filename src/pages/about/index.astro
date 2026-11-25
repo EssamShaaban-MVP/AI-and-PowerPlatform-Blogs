@@ -1,0 +1,32 @@
+---
+import Base from '../../layouts/Base.astro';
+import SectionHeading from '../../components/SectionHeading.astro';
+import AboutRobot from '../../components/AboutRobot.astro';
+import ProcessTimeline from '../../components/ProcessTimeline.astro';
+import { site } from '../../data/site';
+import { abs, breadcrumbs, personRef } from '../../lib/seo';
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const url = (s: string) => base + s;
+---
+<Base
+  title="About Essam Shaaban | Microsoft MVP & Senior Software Engineer"
+  description="Senior Software Engineer and Microsoft MVP in Business Applications, building secure, human-centered solutions with the Microsoft Power Platform and agentic AI."
+  image="/og/home.jpg"
+  imageAlt="About Essam Shaaban — Microsoft MVP and Senior Software Engineer"
+  jsonLd={[
+    breadcrumbs([['Home', '/'], ['About', '/about/']]),
+    { '@type': 'AboutPage', '@id': abs('/about/') + '#page', url: abs('/about/'), name: 'About Essam Shaaban', mainEntity: personRef },
+  ]}
+>
+<section class="page-heading container">
+  <span class="eyebrow">ABOUT / {site.location.toUpperCase()}</span>
+  <h1>Engineering with<br/><span class="gradient-text">purpose.</span></h1>
+  <p>From business problems to scalable digital experiences.</p>
+</section>
+
+<section class="section container" id="about"><div class="about-grid"><div class="about-quote"><span class="quote-symbol">“</span><p>Technology should make complex work feel <em>simple.</em></p><div class="quote-foot">— My engineering philosophy</div></div><div class="about-copy"><p>I'm a Senior Software Engineer and Microsoft MVP in Business Applications, specializing in the Microsoft Power Platform and the evolving agentic AI ecosystem.</p><p>My work focuses on secure architecture, thoughtful user experiences, data integration, and automation that supports real operational outcomes.</p><p>Outside delivery work, I share hands-on technical writing, architecture patterns, and lessons learned with the Microsoft community.</p><a href={url('/expertise/')} class="text-link">Explore my expertise <span aria-hidden="true">→</span></a></div></div><AboutRobot /></section>
+
+<ProcessTimeline />
+
+<section class="section container next-steps"><SectionHeading eyebrow="NEXT" title="Where to go from here." subtitle="See the work, the credentials, or read the writing."/><div class="info-grid"><a class="info-card" href={url('/projects/')}><span class="tiny-label">PROJECTS</span><h3>Selected work</h3><p>Representative architecture and solution themes.</p><span class="text-link">View projects <span aria-hidden="true">→</span></span></a><a class="info-card" href={url('/credentials/')}><span class="tiny-label">CREDENTIALS</span><h3>Microsoft certifications</h3><p>Verified on my public Microsoft Learn transcript.</p><span class="text-link">View credentials <span aria-hidden="true">→</span></span></a><a class="info-card" href={url('/blog/')}><span class="tiny-label">BLOG</span><h3>Technical writing</h3><p>Patterns, implementation guides and honest tradeoffs.</p><span class="text-link">Read the blog <span aria-hidden="true">→</span></span></a></div></section>
+</Base>

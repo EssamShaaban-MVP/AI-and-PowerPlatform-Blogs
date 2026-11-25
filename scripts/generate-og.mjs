@@ -76,7 +76,7 @@ async function render({ file, eyebrow, title, subtitle, titleSize = 60, maxChars
 
 await render({ file: 'home.jpg', eyebrow: 'Essam Shaaban', title: 'Architecting Intelligent Enterprise Solutions', subtitle: 'Power Platform · Agentic AI · Microsoft Foundry' });
 await render({ file: 'certifications.jpg', eyebrow: 'Microsoft credentials', title: 'Microsoft Certifications', subtitle: 'Verified on Microsoft Learn' });
-await render({ file: 'blog.jpg', eyebrow: 'Technical blog', title: 'Notes from the field', subtitle: 'Agentic AI · Power Platform · Azure integration' });
+await render({ file: 'blog.jpg', eyebrow: 'Technical blog', title: 'Power Platform & AI Blog', subtitle: 'Power Apps · Power Automate · Dataverse · Agentic AI' });
 
 const blogDir = path.join(root, 'src', 'content', 'blog');
 for (const f of fs.readdirSync(blogDir).filter((f) => f.endsWith('.md'))) {

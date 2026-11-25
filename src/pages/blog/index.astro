@@ -1,17 +1,20 @@
 ---
 import Base from '../../layouts/Base.astro';
 import { getCollection } from 'astro:content';
-const posts = (await getCollection('blog',({data})=>!data.draft)).sort((a,b)=>b.data.date.valueOf()-a.data.date.valueOf());
-const categories = ['All', ...new Set(posts.map(p=>p.data.category))];
-const base = import.meta.env.BASE_URL.replace(/\/$/, '');
-import Icon from '../../components/Icon.astro';
+import BlogCard from '../../components/BlogCard.astro';
 import { abs, breadcrumbs, personRef } from '../../lib/seo';
+const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+// Filters are derived from the articles themselves, so new posts appear automatically.
+const categories = [...new Set(posts.map(p => p.data.category))].sort();
+const catCount = (c: string) => posts.filter(p => p.data.category === c).length;
+const tags = [...new Set(posts.flatMap(p => p.data.tags))].sort((a, b) => a.localeCompare(b));
+const blogDescription = 'Hands-on guides and architecture notes on Power Apps, Power Automate, Dataverse, Microsoft Foundry and agentic AI.';
 const jsonLd = [
   {
     '@type': 'Blog',
     '@id': abs('/blog/') + '#blog',
-    name: 'Essam Shaaban — Technical Blog',
-    description: 'Hands-on notes on Microsoft Foundry, agentic AI, Power Platform, and secure integration.',
+    name: 'Essam Shaaban — Power Platform & AI Blog',
+    description: blogDescription,
     url: abs('/blog/'),
     inLanguage: 'en-US',
     author: personRef,
@@ -27,15 +30,82 @@ const jsonLd = [
   },
   breadcrumbs([['Home', '/'], ['Blog', '/blog/']]),
 ];
-const blogIcon: Record<string,string> = { 'Agentic AI':'sparkles', 'Architecture':'layers', 'Power Platform':'workflow' };
 ---
-<Base title="Technical Blog: Agentic AI & Power Platform | Essam Shaaban" description="Hands-on notes on Microsoft Foundry, agentic AI, Power Platform, and secure integration." image="/og/blog.jpg" imageAlt="Technical blog by Essam Shaaban — notes from the field" jsonLd={jsonLd}><section class="page-heading container"><span class="eyebrow">THE KNOWLEDGE BASE</span><h1>Thinking out loud.<br/><span class="gradient-text">Building in public.</span></h1><p>Architecture notes, implementation guides, and lessons learned across AI, low-code, and cloud engineering.</p></section><section class="container blog-page"><div class="blog-tools"><div class="category-filters" aria-label="Filter articles by topic">{categories.map((c,i)=><button class:list={['filter-button',i===0&&'active']} type="button" data-category={c}>{c}</button>)}</div><label class="blog-search"><span aria-hidden="true">⌕</span><input type="search" id="post-search" placeholder="Search articles..." aria-label="Search articles" /></label></div><div class="post-list" id="post-list">{posts.map((post,i)=><a data-category={post.data.category} data-search={`${post.data.title} ${post.data.description} ${post.data.tags.join(' ')}`.toLowerCase()} class="post-list-item" href={`${base}/blog/${post.id}/`}><div class:list={['list-art','blog-art-'+i%3]}><Icon name={blogIcon[post.data.category] ?? 'layers'} /></div><div class="post-list-info"><div class="post-meta"><span>{post.data.category}</span><time datetime={post.data.date.toISOString().slice(0,10)}>{post.data.date.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric',timeZone:'UTC'})}</time><span>{post.data.readingMinutes??5} MIN READ</span></div><h2>{post.data.title}</h2><p>{post.data.description}</p><div class="tag-row">{post.data.tags.map(t=><span>{t}</span>)}</div></div><div class="post-arrow">↗</div></a>)}</div><p id="no-results" class="empty-results" hidden>No matching articles. Try another search or topic.</p></section><script>
-const filters = document.querySelectorAll<HTMLButtonElement>('.filter-button');
-const search = document.querySelector<HTMLInputElement>('#post-search');
-const items = document.querySelectorAll<HTMLElement>('.post-list-item');
-const empty = document.querySelector<HTMLElement>('#no-results');
+<Base title="Power Platform & AI Blog: Agentic AI, Power Apps, Dataverse | Essam Shaaban" description={blogDescription} image="/og/blog.jpg" imageAlt="Power Platform & AI Blog by Essam Shaaban" jsonLd={jsonLd}>
+<section class="page-heading container">
+  <span class="eyebrow">POWER PLATFORM &amp; AI BLOG</span>
+  <h1>Guides, patterns and<br/><span class="gradient-text">lessons from the build.</span></h1>
+  <p>Step-by-step guides and architecture notes on Power Apps, Power Automate, Dataverse and agentic AI.</p>
+  <div class="page-heading-actions blog-head-actions">
+    <a class="button button-secondary" href={abs('/rss.xml')}>RSS feed <span aria-hidden="true">↗</span></a>
+  </div>
+</section>
+<section class="container blog-page">
+  <div class="blog-controls">
+    <div class="blog-controls-row">
+      <label class="blog-search"><span aria-hidden="true">⌕</span><input type="search" id="post-search" placeholder="Search titles, topics and tags..." aria-label="Search articles" /></label>
+      <label class="blog-select"><span>Topic</span>
+        <select id="tag-select" aria-label="Filter by topic tag"><option value="">All topics</option>{tags.map(t => <option value={t.toLowerCase()}>{t}</option>)}</select>
+      </label>
+      <label class="blog-select"><span>Sort</span>
+        <select id="sort-select" aria-label="Sort articles"><option value="new">Newest first</option><option value="old">Oldest first</option><option value="read">Shortest read</option></select>
+      </label>
+    </div>
+    <div class="category-filters" role="group" aria-label="Filter articles by category">
+      <button class="filter-button active" type="button" data-category="All" aria-pressed="true">All <small>{posts.length}</small></button>
+      {categories.map(c => <button class="filter-button" type="button" data-category={c} aria-pressed="false">{c} <small>{catCount(c)}</small></button>)}
+    </div>
+    <div class="blog-status"><span id="result-count" role="status" aria-live="polite">Showing {posts.length} of {posts.length} articles</span><button type="button" class="blog-clear" id="clear-filters" hidden>Clear filters</button></div>
+  </div>
+  <div class="bgrid" id="post-list">{posts.map((post, i) => <BlogCard post={post} headingLevel={2} eager={i < 3} />)}
+</div>
+  <p id="no-results" class="empty-results" hidden>No matching articles. Try another search, topic or category.</p>
+</section>
+<script>
+const $ = <T extends HTMLElement>(s: string) => document.querySelector<T>(s)!;
+const list = $('#post-list');
+const items = Array.from(list.querySelectorAll<HTMLElement>('.bcard'));
+const buttons = document.querySelectorAll<HTMLButtonElement>('.filter-button');
+const search = $<HTMLInputElement>('#post-search');
+const tagSel = $<HTMLSelectElement>('#tag-select');
+const sortSel = $<HTMLSelectElement>('#sort-select');
+const count = $('#result-count'), empty = $('#no-results'), clear = $<HTMLButtonElement>('#clear-filters');
 let category = 'All';
-function update(){const term=(search?.value||'').toLowerCase().trim();let shown=0;items.forEach(el=>{const match=(category==='All'||el.dataset.category===category)&&el.dataset.search?.includes(term);el.hidden=!match;if(match)shown++});if(empty)empty.hidden=shown>0;}
-filters.forEach(btn=>btn.addEventListener('click',()=>{category=btn.dataset.category||'All';filters.forEach(b=>b.classList.toggle('active',b===btn));update()}));
-search?.addEventListener('input',update);
-</script></Base>
+
+// Restore filters from the URL so a filtered view can be shared or bookmarked.
+const q = new URLSearchParams(location.search);
+const cat = q.get('category');
+if (cat && Array.from(buttons).some(b => b.dataset.category === cat)) category = cat;
+search.value = q.get('q') ?? '';
+if (Array.from(tagSel.options).some(o => o.value === q.get('tag'))) tagSel.value = q.get('tag')!;
+if (Array.from(sortSel.options).some(o => o.value === q.get('sort'))) sortSel.value = q.get('sort')!;
+
+function update() {
+  const term = search.value.toLowerCase().trim(), tag = tagSel.value, sort = sortSel.value;
+  const date = (el: HTMLElement) => Date.parse(el.dataset.date!);
+  const read = (el: HTMLElement) => Number(el.dataset.read);
+  const order = (a: HTMLElement, b: HTMLElement) => sort === 'old' ? date(a) - date(b) : sort === 'read' ? read(a) - read(b) || date(b) - date(a) : date(b) - date(a);
+  [...items].sort(order).forEach(el => list.appendChild(el));
+  let shown = 0;
+  items.forEach(el => {
+    const ok = (category === 'All' || el.dataset.category === category) && (!tag || (el.dataset.tags ?? '').split('|').includes(tag)) && (el.dataset.search ?? '').includes(term);
+    el.hidden = !ok; if (ok) shown++;
+  });
+  buttons.forEach(b => { const on = b.dataset.category === category; b.classList.toggle('active', on); b.setAttribute('aria-pressed', String(on)); });
+  count.textContent = `Showing ${shown} of ${items.length} articles`;
+  empty.hidden = shown > 0;
+  clear.hidden = !(category !== 'All' || term || tag || sort !== 'new');
+  const p = new URLSearchParams();
+  if (category !== 'All') p.set('category', category);
+  if (term) p.set('q', search.value.trim());
+  if (tag) p.set('tag', tag);
+  if (sort !== 'new') p.set('sort', sort);
+  const qs = p.toString();
+  history.replaceState(null, '', location.pathname + (qs ? '?' + qs : ''));
+}
+buttons.forEach(b => b.addEventListener('click', () => { category = b.dataset.category || 'All'; update(); }));
+[search, tagSel, sortSel].forEach(el => el.addEventListener('input', update));
+clear.addEventListener('click', () => { category = 'All'; search.value = ''; tagSel.value = ''; sortSel.value = 'new'; update(); });
+update();
+</script>
+</Base>

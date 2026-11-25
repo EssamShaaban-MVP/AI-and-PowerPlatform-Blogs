@@ -118,32 +118,42 @@ Most edits happen in **`src/data/site.ts`** — pages read from it, so nothing n
 
 ## Publishing a new blog post
 
+Every article follows the same structure so the blog reads consistently.
+
 1. **Create** `src/content/blog/<url-slug>.md`. The file name becomes the URL: `/blog/<url-slug>/`.
 
    ```md
    ---
    title: "Your article title"
-   description: "One sentence used in listings, search results and social previews."
+   description: "One or two sentences. Shown on the article card, in search results and in social previews."
    date: 2026-12-01
-   category: "Agentic AI"          # existing: Agentic AI, Architecture, Power Platform
-   tags: ["Microsoft Foundry", "Security"]
+   category: "Power Apps"          # existing: Power Apps, Power Automate, Power BI, AI & Copilot, Power Platform
+   tags: ["Power Apps", "Power Fx"]
+   cover: "/blog-images/<url-slug>/cover.webp"   # optional; shown on the card and at the top of the article
    readingMinutes: 6               # optional (defaults to 5)
    draft: false                    # true = hidden from every listing, route, RSS and sitemap
    ---
 
-   ## First section
+   Opening paragraph(s): what the article covers and why it matters. Do not repeat the title.
 
-   Markdown content. Use `##` for sections — they appear in the "On this page" table of contents.
+   ## Section heading
+
+   Content. Use `##` for sections, `###` for sub-steps. No heading levels may be skipped.
    ```
 
-   The frontmatter is validated by `src/content.config.ts`; the build fails with a clear message if a field is missing or mistyped.
+   **Writing format**
+   - Start with an introduction paragraph (no title repeat, no `#` heading).
+   - `##` sections, `###` sub-sections; sentence-style headings without emoji or trailing colons.
+   - Tight bullet lists (`- item`), numbered steps (`1. step`), fenced code blocks for formulas and code.
+   - Every image has meaningful alt text: `![What the screenshot shows](/blog-images/<url-slug>/01.webp)`.
 
-2. **Generate the share image:** `npm run og` (creates `public/og/blog/<url-slug>.jpg`). Without it the article falls back to the generic blog image.
-3. **Preview:** `npm run dev` and open `/blog/<url-slug>/`.
-4. **Build check:** `npm run build`.
-5. **Commit and push** to `main` — the workflow deploys automatically.
+2. **Images:** put them in `public/blog-images/<url-slug>/` (WebP, about 1400 px wide) and reference them as `/blog-images/<url-slug>/01.webp`. The site adds the GitHub Pages base path automatically. The first image is a good `cover`. Without `cover`, the generated share image is used on the card.
+3. **Generate the share image:** `npm run og` (creates `public/og/blog/<url-slug>.jpg`). Without it the article falls back to the generic blog image.
+4. **Preview:** `npm run dev` and open `/blog/<url-slug>/`.
+5. **Build check:** `npm run build`.
+6. **Commit and push** to `main` — the workflow deploys automatically.
 
-The new post appears automatically in the blog list, search and filters, the home page "latest articles" (newest three), the RSS feed, the sitemap, and the structured data. New categories also get a filter button; add an icon for them in `blogIcon` (`src/pages/index.astro` and `src/pages/blog/index.astro`), otherwise a default icon is used.
+The new post appears automatically in the blog list, search and filters (categories and tags are derived from the posts), the home page "latest articles" (newest three), the "Keep reading" block of other articles, the RSS feed, the sitemap, and the structured data.
 
 ## Production build
 
