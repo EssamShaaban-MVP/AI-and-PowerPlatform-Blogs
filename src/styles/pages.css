@@ -123,3 +123,29 @@
 .pg-btn:hover:not(:disabled){border-color:var(--line-hover)}
 .pg-btn.active{background:var(--c-83d5ff);border-color:var(--c-83d5ff);color:#06111e}
 .pg-btn:disabled{opacity:.4;cursor:default}
+
+/* Header brand: monogram tile + name with role */
+.brand{gap:12px}
+.brand .brand-mark{display:grid;place-items:center;width:38px;height:38px;border-radius:11px;background:linear-gradient(140deg,#4ab7ff,#2b6bff);color:#fff;font:800 15px/1 var(--font-sans);letter-spacing:.02em;box-shadow:0 6px 18px -6px rgba(74,183,255,.7)}
+.brand-text{display:flex;flex-direction:column;gap:3px;line-height:1}
+.brand-name{font-size:17px;font-weight:700;letter-spacing:-.01em;color:#fff}
+.brand-role{font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--c-83d5ff)}
+@media(max-width:420px){.brand-role{display:none}}
+
+/* Hero: compact list of the MVP award and every Microsoft certification */
+.hx-certs{display:flex;flex-wrap:wrap;gap:12px;margin:26px 0 0;padding:0;list-style:none;max-width:none}
+.hx-cert{display:inline-flex;align-items:center;gap:12px;padding:8px 20px 8px 10px;border:1px solid rgba(255,255,255,.18);border-radius:999px;background:rgba(255,255,255,.07);color:#e9f0fe;font-size:17px;font-weight:700;letter-spacing:.03em;transition:border-color .2s,background .2s}
+.hx-cert:hover{border-color:var(--c-83d5ff);background:rgba(131,213,255,.14)}
+.hx-cert img{display:block;width:44px;height:44px;border-radius:50%}
+.hx-cert-mvp{border-color:rgba(131,213,255,.5);background:rgba(74,183,255,.14)}
+
+/* Brand: robot standing beside the name, hand resting on it */
+.brand{gap:0}
+.brand .brand-text{margin-left:10px;padding-top:0}
+
+/* Header sized for the mascot */
+.header,.header-bar .header{height:76px}
+.brand .brand-name{font-size:19px}
+.brand .brand-role{font-size:11.5px}
+:root{scroll-padding-top:90px}
+@media(max-width:640px){.header,.header-bar .header{height:70px}}

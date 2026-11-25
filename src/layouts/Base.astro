@@ -1,6 +1,7 @@
 ---
 // Self-hosted fonts (WOFF2, font-display: swap): Urbanist for the site, JetBrains Mono for code only.
 import '@fontsource-variable/urbanist';
+import BrandRobot from '../components/BrandRobot.astro';
 import '@fontsource/jetbrains-mono/400.css';
 import fontLatin from '@fontsource-variable/urbanist/files/urbanist-latin-wght-normal.woff2?url';
 import '../styles/theme.css';
@@ -90,7 +91,7 @@ const verify = site.seo ?? {};
 <a class="skip-link" href="#main">Skip to content</a>
 <div class="site-shell" id="top">
   <div class="header-bar"><header class="header container">
-    <a class="brand" href={href('/')} aria-label="Essam Shaaban home"><span class="brand-mark">E<span>.</span></span><span class="brand-label">ESSAM<span class="brand-muted"> / SHAABAN</span></span></a>
+    <a class="brand" href={href('/')} aria-label="Essam Shaaban home"><BrandRobot /><span class="brand-text"><span class="brand-name">Essam Shaaban</span><span class="brand-role">Sr Software Engineer</span></span></a>
     <nav class="desktop-nav" aria-label="Primary navigation">{links.map(([name,path]) => <a href={href(path)} aria-current={isCurrent(path) ? 'page' : undefined}>{name}</a>)}</nav>
     <a class="nav-cta" href={contactHref}>Let's connect <span aria-hidden="true">→</span></a>
     <button class="theme-toggle" type="button" aria-pressed="true" aria-label="Dark theme" title="Switch to light theme">

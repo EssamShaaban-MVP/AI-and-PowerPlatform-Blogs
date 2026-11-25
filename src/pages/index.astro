@@ -3,7 +3,7 @@ import Base from '../layouts/Base.astro';
 import SectionHeading from '../components/SectionHeading.astro';
 import BlogCard from '../components/BlogCard.astro';
 import { person, homeUrl, websiteId } from '../lib/seo';
-import { site, mvp } from '../data/site';
+import { site, mvp, certifications } from '../data/site';
 import { getCollection } from 'astro:content';
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const url = (s: string) => base + s;
@@ -23,18 +23,12 @@ const tags = [...new Set(posts.flatMap(p => p.data.tags))].sort((a, b) => a.loca
 <section class="hx" aria-labelledby="hx-title">
   <div class="container hx-inner">
     <div class="hx-copy">
-      <p class="hx-eyebrow">Essam Shaaban</p>
       <h1 id="hx-title">Architecting <span class="hx-accent">Intelligent</span> <span class="hx-keep">Enterprise Solutions</span></h1>
       <p class="hx-intro">Microsoft MVP and Senior Software Engineer focused on building secure, scalable business applications and exploring enterprise Agentic AI architectures across Microsoft Power Platform, Microsoft Foundry, and connected data platforms.</p>
-      <a class="hx-mvp" href={site.links.mvp} target="_blank" rel="noopener">
-        <img src={url(mvp.badgeSmall)} alt="" width="56" height="56" />
-        <span><strong>Microsoft Most Valuable Professional</strong><small>{mvp.category} · {mvp.currentAward}</small></span>
-        <span class="hx-mvp-arrow" aria-hidden="true">↗</span>
-      </a>
-      <div class="hx-actions">
-        <a class="button button-primary" href={url('/projects/')}>Explore My Work <span aria-hidden="true">→</span></a>
-        <a class="button button-secondary" href={url('/#writing')}>Read Technical Blog <span aria-hidden="true">→</span></a>
-      </div>
+      <ul class="hx-certs" aria-label="Microsoft certifications">
+        <li><a class="hx-cert hx-cert-mvp" href={site.links.mvp} target="_blank" rel="noopener" title={`Microsoft MVP, ${mvp.category}`}><img src={url(mvp.badgeSmall)} alt="" width="44" height="44" /><span>MVP</span></a></li>
+        {certifications.map(c => <li><a class="hx-cert" href={url('/credentials/')} title={c.title}><img src={url(`/badges/${c.badge}.svg`)} alt="" width="44" height="44" loading="lazy" /><span>{c.code}</span></a></li>)}
+      </ul>
       <p class="hx-meta">Senior Software Engineer <span aria-hidden="true">·</span> {site.location}</p>
     </div>
     <div class="hx-visual">
