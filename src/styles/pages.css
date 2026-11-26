@@ -149,3 +149,19 @@
 .brand .brand-role{font-size:11.5px}
 :root{scroll-padding-top:90px}
 @media(max-width:640px){.header,.header-bar .header{height:70px}}
+
+/* Technical Articles heading: larger title */
+#writing .section-heading h2{font-size:clamp(34px,4.2vw,54px);line-height:1.08;letter-spacing:-.035em;margin:0}
+#writing .section-heading>div{display:block}
+#writing .section-heading p{margin:12px 0 0;max-width:640px;justify-self:auto}
+
+/* Selected filter / layout / page buttons: bright blue with white text in both themes (readable on light and dark) */
+#writing .filter-button.active,.view-btn.active,.pg-btn.active{background:#1d6fd0;border-color:#1d6fd0;color:#fff}
+#writing .filter-button.active small{color:rgba(255,255,255,.8)}
+.view-btn.active svg{color:#fff}
+.view-btn:not(.active),.pg-btn{color:var(--text-1)}
+.view-btn:not(.active){color:var(--text-2)}
+.pg-btn.active{box-shadow:0 6px 16px -8px rgba(29,111,208,.8)}
+
+/* Technical Articles: sit closer to the hero (the generic section padding left a large gap above the title) */
+#writing.section{padding-top:clamp(28px,3.5vw,44px)}
