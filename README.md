@@ -87,7 +87,7 @@ Most edits happen in **`src/data/site.ts`** — pages read from it, so nothing n
 
 | What | Where |
 |---|---|
-| Name, intro, location, public profile links | `site` in `src/data/site.ts` |
+| Name, intro, public profile links | `site` in `src/data/site.ts` |
 | Search console verification codes | `site.seo` in `src/data/site.ts` |
 | MVP category, first year, current award, badge | `mvp` in `src/data/site.ts` |
 | Certifications (titles, codes, dates, status, badge, verify link) | `certifications` in `src/data/site.ts` |

@@ -27,11 +27,10 @@ const tags = [...new Set(posts.flatMap(p => p.data.tags))].sort((a, b) => a.loca
       <h1 id="hx-title">Architecting <span class="hx-accent">Intelligent</span> <span class="hx-keep">Enterprise Solutions</span></h1>
       <p class="hx-intro">Microsoft MVP and Senior Software Engineer focused on building secure, scalable business applications and exploring enterprise Agentic AI architectures across Microsoft Power Platform, Microsoft Foundry, and connected data platforms.</p>
       <ul class="hx-certs" aria-label="Microsoft certifications">
-        <li><a class="hx-cert hx-cert-mvp" href={site.links.mvp} target="_blank" rel="noopener" title={`Microsoft MVP, ${mvp.category}`}><img src={url(mvp.badgeSmall)} alt="" width="28" height="28" /><span>MVP</span></a></li>
-        {certifications.map(c => <li><a class="hx-cert" href={url('/credentials/')} title={c.title}><img src={url(`/badges/${c.badge}.svg`)} alt="" width="28" height="28" loading="lazy" /><span>{c.code}</span></a></li>)}
+        <li><a class="hx-cert hx-cert-mvp" href={site.links.mvp} target="_blank" rel="noopener" title={`Microsoft MVP, ${mvp.category}`}><img src={url(mvp.badgeSmall)} alt="" width="22" height="22" /><span>MVP</span></a></li>
+        {certifications.map(c => <li><a class="hx-cert" href={url('/credentials/')} title={c.title}><img src={url(`/badges/${c.badge}.svg`)} alt="" width="22" height="22" loading="lazy" /><span>{c.code}</span></a></li>)}
       </ul>
       <div class="hx-kpis" id="impact"><KpiStrip articles={posts.length} /></div>
-      <p class="hx-meta">Senior Software Engineer <span aria-hidden="true">·</span> {site.location}</p>
     </div>
     <div class="hx-visual">
       <img class="hx-portrait" src={url('/essam-shaaban-cutout.webp')} srcset={`${url('/essam-shaaban-cutout-600.webp')} 600w, ${url('/essam-shaaban-cutout.webp')} 1040w`} sizes="(max-width: 900px) min(440px, 88vw), 560px" alt="Essam Shaaban, Microsoft MVP and Senior Software Engineer" width="1040" height="891" fetchpriority="high" decoding="async" />

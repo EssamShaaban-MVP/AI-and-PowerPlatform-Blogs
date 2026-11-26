@@ -26,7 +26,6 @@ export const person = {
   description: 'Microsoft MVP and Senior Software Engineer focused on secure, scalable business applications and enterprise agentic AI across Microsoft Power Platform and Microsoft Foundry.',
   award: `Microsoft Most Valuable Professional (MVP), ${mvp.category}`,
   knowsAbout: ['Microsoft Power Platform', 'Power Apps', 'Power Automate', 'Dataverse', 'Copilot Studio', 'Microsoft Foundry', 'Agentic AI', 'Model Context Protocol', 'Azure Logic Apps', 'Azure Functions', 'Microsoft Entra ID'],
-  address: { '@type': 'PostalAddress', addressLocality: 'Memphis', addressRegion: 'TN', addressCountry: 'US' },
   sameAs: [site.links.linkedin, site.links.mvp].filter(Boolean),
 };
 

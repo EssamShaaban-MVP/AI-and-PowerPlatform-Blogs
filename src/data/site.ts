@@ -3,7 +3,6 @@ export const site = {
   role: 'Senior Software Engineer • Microsoft MVP',
   headline: 'Designing practical AI systems. Building business solutions that last.',
   intro: 'I work at the intersection of agentic AI, Microsoft Power Platform, and enterprise architecture—turning complex processes into reliable, human-centered solutions.',
-  location: 'Memphis, Tennessee',
   // Add only public profiles that you have verified and wish to share.
   links: {
     linkedin: 'https://www.linkedin.com/in/essam-shaaban-37a4371b1',
