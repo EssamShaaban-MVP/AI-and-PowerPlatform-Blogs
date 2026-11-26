@@ -87,17 +87,12 @@ const verify = site.seo ?? {};
   </header>
   <nav id="mobile-menu" class="mobile-nav container" aria-label="Mobile navigation" hidden>{links.map(([name,path]) => <a href={href(path)} aria-current={isCurrent(path) ? 'page' : undefined}>{name}</a>)}<a href={contactHref}>Contact</a></nav></div>
   <main id="main" tabindex="-1"><slot /></main>
-  {contact && <ContactCta />}
   <footer class="footer">
+    {contact && <ContactCta />}
     <div class="container footer-main">
-      <div class="footer-id">
-        <a class="footer-name" href={href('/')}>Essam Shaaban</a>
-        <span class="footer-role">Sr Software Engineer · Microsoft MVP</span>
-      </div>
-      <p class="footer-tag">Architecting intelligent enterprise solutions with Power Platform, Microsoft Foundry and agentic AI.</p>
+      <p class="footer-name">© {new Date().getFullYear()} Essam Shaaban</p>
       <a class="footer-top" href="#top" title="Back to top"><span>Back to top</span><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg></a>
     </div>
-    <div class="container footer-base"><span>© {new Date().getFullYear()} Essam Shaaban</span><span class="footer-loc">{site.location}</span></div>
   </footer>
 </div>
 <script>
