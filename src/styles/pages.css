@@ -214,7 +214,7 @@
 .contact-way-text strong{font-size:15.5px;font-weight:700}
 .contact-way-text small{font-size:13px;color:#b4c6e4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .contact-way.is-primary small{color:#e4efff}
-.contact-way:hover @media(max-width:860px){.contact-section .contact-inner{grid-template-columns:1fr}}
+@media(max-width:860px){.contact-section .contact-inner{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){.contact-way{transition:none}.contact-way:hover{transform:none}}
 .contact-section .contact-inner{width:min(1160px,calc(100% - 64px));margin-inline:auto;position:relative;overflow:hidden}
 .contact-section .contact-inner:before{left:0;right:auto;top:0;width:100%;height:2px;border:0;border-radius:0}
