@@ -165,3 +165,19 @@
 
 /* Technical Articles: sit closer to the hero (the generic section padding left a large gap above the title) */
 #writing.section{padding-top:clamp(28px,3.5vw,44px)}
+
+/* Contribution KPIs: compact cards that match the site's cards (surface, border, radius, blue accent) */
+.kpi-section{padding-top:clamp(32px,4vw,48px)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin:0;padding:0;list-style:none}
+.kpi{display:flex;align-items:flex-start;gap:14px;padding:18px 20px;border:1px solid var(--line);border-radius:var(--r-card);background:linear-gradient(165deg,var(--card-a),var(--card-b));box-shadow:var(--shadow-card);transition:transform .25s var(--ease),border-color .25s,box-shadow .25s}
+.kpi:hover{transform:translateY(-3px);border-color:var(--line-hover);box-shadow:var(--shadow-hover)}
+.kpi-icon{flex:none;display:grid;place-items:center;width:38px;height:38px;border-radius:11px;color:#1d6fd0;background:rgba(43,139,224,.12);border:1px solid rgba(43,139,224,.22)}
+.kpi-body{display:flex;flex-direction:column;gap:2px;min-width:0}
+.kpi-value{display:flex;align-items:baseline;gap:1px;font-size:clamp(28px,2.8vw,34px);font-weight:700;line-height:1.05;letter-spacing:-.03em;color:var(--text-1);font-variant-numeric:tabular-nums}
+.kpi-suffix{font-size:.7em;color:#1d6fd0}
+.kpi-label{font-size:14.5px;font-weight:700;color:var(--text-1);margin-top:4px}
+.kpi-note{font-size:12.5px;line-height:1.45;color:var(--text-2)}
+[data-theme="dark"] .kpi-icon{color:#7cc8ff;background:rgba(124,200,255,.1);border-color:rgba(124,200,255,.25)}
+[data-theme="dark"] .kpi-suffix{color:#7cc8ff}
+@media(max-width:560px){.kpis{grid-template-columns:1fr 1fr;gap:12px}.kpi{flex-direction:column;gap:10px;padding:16px}}
+@media(prefers-reduced-motion:reduce){.kpi{transition:none}.kpi:hover{transform:none}}

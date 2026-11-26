@@ -2,6 +2,7 @@
 import Base from '../layouts/Base.astro';
 import SectionHeading from '../components/SectionHeading.astro';
 import BlogCard from '../components/BlogCard.astro';
+import KpiStrip from '../components/KpiStrip.astro';
 import { person, homeUrl, websiteId } from '../lib/seo';
 import { site, mvp, certifications } from '../data/site';
 import { getCollection } from 'astro:content';
@@ -36,6 +37,8 @@ const tags = [...new Set(posts.flatMap(p => p.data.tags))].sort((a, b) => a.loca
     </div>
   </div>
 </section>
+
+<section class="container kpi-section" id="impact"><KpiStrip articles={posts.length} /></section>
 
 <section class="section container" id="writing">
   <SectionHeading title="Technical Articles" subtitle="Practical implementation guides, architecture patterns and technical insights."/>

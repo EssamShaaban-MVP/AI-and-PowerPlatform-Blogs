@@ -1,0 +1,58 @@
+---
+// Contribution KPIs: compact stat cards styled like the rest of the site (same card surface, border, radius and blue accent).
+// Numbers count up when scrolled into view (static final numbers without JavaScript or with reduced motion).
+// Values come from the site content (article count) and src/data/impact.ts; the biggest figure comes first.
+import { impact } from '../data/impact';
+interface Props { articles: number }
+const { articles } = Astro.props;
+
+const icons: Record<string, string> = {
+  article: '<path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 12h7M9 16h7"/>',
+  eye: '<path d="M2 12s3.600-7 10-7 10 7 10 7-3.600 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+  calendar: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+  mic: '<rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>',
+  layers: '<path d="m12 3 9 5-9 5-9-5z"/><path d="m3 13 9 5 9-5"/>',
+  users: '<circle cx="9" cy="8" r="3.500"/><path d="M2.500 20a6.500 6.500 0 0 1 13 0M16 4.500a3.500 3.500 0 0 1 0 7M18 20a6.500 6.500 0 0 0-3-5.400"/>',
+};
+type Card = { value: number; suffix?: string; label: string; note?: string; icon: string };
+const cards: Card[] = [
+  { value: articles, label: 'Technical articles', note: 'Guides and architecture notes', icon: 'article' },
+  impact.articleViews != null ? { value: impact.articleViews, label: 'Article reads', note: 'Readers across all posts', icon: 'eye' } : null,
+  impact.eventsOrganized != null ? { value: impact.eventsOrganized, label: 'Events organized', note: 'Community events I led', icon: 'calendar' } : null,
+  impact.speakingSessions != null ? { value: impact.speakingSessions, label: 'Speaking sessions', note: 'Events as a speaker', icon: 'mic' } : null,
+  ...impact.extra.map(e => ({ ...e, icon: e.icon ?? 'users' })),
+].filter(Boolean).sort((a, b) => b!.value - a!.value) as Card[]; // highest figure first
+const fmt = (n: number) => n.toLocaleString('en-US');
+---
+<ul class="kpis" aria-label="Contribution highlights">
+  {cards.map(c => (
+    <li class="kpi">
+      <span class="kpi-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" set:html={icons[c.icon] ?? icons.layers} /></span>
+      <span class="kpi-body">
+        <span class="kpi-value"><span class="kpi-num" data-count={c.value}>{fmt(c.value)}</span>{c.suffix && <span class="kpi-suffix">{c.suffix}</span>}</span>
+        <span class="kpi-label">{c.label}</span>
+        {c.note && <span class="kpi-note">{c.note}</span>}
+      </span>
+    </li>
+  ))}
+</ul>
+<script is:inline>
+(function () {
+  var nums = document.querySelectorAll('.kpi-num');
+  if (!nums.length || window.matchMedia('(prefers-reduced-motion: reduce)').matches || !('IntersectionObserver' in window)) return;
+  function run(el) {
+    var end = Number(el.dataset.count), t0 = null, dur = 1200;
+    function step(t) {
+      if (t0 === null) t0 = t;
+      var p = Math.min(1, (t - t0) / dur), eased = 1 - Math.pow(1 - p, 3);
+      el.textContent = Math.round(end * eased).toLocaleString('en-US');
+      if (p < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) { if (e.isIntersecting) { run(e.target); io.unobserve(e.target); } });
+  }, { threshold: 0.4 });
+  nums.forEach(function (n) { n.textContent = '0'; io.observe(n); });
+})();
+</script>
