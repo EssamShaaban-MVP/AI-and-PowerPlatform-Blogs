@@ -1,0 +1,56 @@
+---
+// Assistant robot (original SVG artwork, flat gradient style): blue-to-cyan rounded head (site palette) with an antenna, dark visor with
+// big glossy eyes, a smile, a floating pear-shaped body, two arms resting at its sides and a soft shadow.
+// Animation (CSS in assistant.css): gentle float, pupils glance left/right, head tilt and blink. All motion stops for prefers-reduced-motion.
+---
+<svg class="wv-robot" viewBox="0 0 200 220" aria-hidden="true" focusable="false">
+  <defs>
+    <linearGradient id="wvg-head" x1="0.1" y1="1" x2="0.95" y2="0"><stop offset="0" stop-color="#1d6fd0"/><stop offset=".55" stop-color="#2fa0ee"/><stop offset="1" stop-color="#7fe3ff"/></linearGradient>
+    <linearGradient id="wvg-body" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2a86e6"/><stop offset=".6" stop-color="#3db4f2"/><stop offset="1" stop-color="#8fe8ff"/></linearGradient>
+    <linearGradient id="wvg-arm" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#4aa6f0"/><stop offset="1" stop-color="#6fdcff"/></linearGradient>
+    <linearGradient id="wvg-visor" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0a1633"/><stop offset="1" stop-color="#14306a"/></linearGradient>
+    <radialGradient id="wvg-shadow" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#2b8be0" stop-opacity=".55"/><stop offset="1" stop-color="#2b8be0" stop-opacity="0"/></radialGradient>
+  </defs>
+
+  <ellipse cx="100" cy="207" rx="42" ry="8" fill="url(#wvg-shadow)"/>
+
+  <g class="wv-float">
+    <!-- body -->
+    <path d="M72 136 C72 128 128 128 128 136 C133 162 122 184 100 186 C78 184 67 162 72 136Z" fill="url(#wvg-body)"/>
+    <path d="M78 140 C80 134 90 132 98 133" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".5"/>
+    <!-- resting arm (viewer's right) -->
+    <path d="M124 136 C135 131 142 142 140 158 C139 168 133 174 128 169 C123 158 121 147 124 136Z" fill="url(#wvg-arm)"/>
+    <path d="M132 138 C137 146 137 158 133 166" fill="none" stroke="#fff" stroke-width="2.600" stroke-linecap="round" opacity=".55"/>
+
+    <!-- left arm at the side (mirror of the right one) -->
+    <path d="M76 136 C65 131 58 142 60 158 C61 168 67 174 72 169 C77 158 79 147 76 136Z" fill="url(#wvg-arm)"/>
+    <path d="M68 138 C63 146 63 158 67 166" fill="none" stroke="#fff" stroke-width="2.600" stroke-linecap="round" opacity=".55"/>
+
+    <!-- head -->
+    <g class="wv-headwrap">
+      <line x1="100" y1="18" x2="100" y2="40" stroke="#4fb4ee" stroke-width="3" stroke-linecap="round"/>
+      <circle cx="100" cy="16" r="5" fill="#7fe3ff"/>
+      <rect x="81" y="38" width="38" height="11" rx="4" fill="#2f8fe0"/>
+      <path d="M44 100 C44 62 70 46 100 46 C130 46 156 62 156 100 C156 120 140 128 100 128 C60 128 44 120 44 100Z" fill="url(#wvg-head)"/>
+      <path d="M128 60 C138 62 146 70 148 80" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" opacity=".75"/>
+      <ellipse cx="138" cy="66" rx="4" ry="3" fill="#fff" opacity=".8"/>
+      <!-- visor -->
+      <rect x="56" y="70" width="88" height="38" rx="19" fill="url(#wvg-visor)" stroke="#4fd0ff" stroke-width="2"/>
+      <g class="wv-eyes">
+        <g class="wv-eye">
+          <circle cx="81" cy="89" r="12" fill="#fff"/>
+          <circle class="wv-pupil" cx="81" cy="90" r="7.200" fill="#0b1735"/>
+          <circle class="wv-pupil" cx="78.500" cy="87" r="2.200" fill="#fff"/>
+        </g>
+        <g class="wv-eye">
+          <circle cx="119" cy="89" r="12" fill="#fff"/>
+          <circle class="wv-pupil" cx="119" cy="90" r="7.200" fill="#0b1735"/>
+          <circle class="wv-pupil" cx="116.500" cy="87" r="2.200" fill="#fff"/>
+        </g>
+      </g>
+      <!-- smile -->
+      <path d="M87 111 Q100 114.500 113 111 Q111 126 100 126 Q89 126 87 111Z" fill="#fff"/>
+      <path d="M93.500 122 Q100 117.500 106.500 122 Q103 126 100 126 Q97 126 93.500 122Z" fill="#1d6fd0"/>
+    </g>
+  </g>
+</svg>

@@ -1,0 +1,50 @@
+---
+// Floating website assistant: a waving robot, an optional greeting bubble (dismissible) and, on click, the chat.
+// Only this markup and a tiny script load up front; the chat code, panel styles and the knowledge index are
+// fetched the first time the visitor opens the assistant (see src/assistant/).
+import AssistantRobot from './AssistantRobot.astro';
+import { assistant } from '../data/assistant';
+import '../styles/assistant.css';
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+<div class="assistant" id="assistant" data-index={`${base}/assistant-index.json`} data-name={assistant.name}>
+  <div class="assistant-bubble" hidden>
+    <button class="assistant-bubble-main" type="button" aria-label={`${assistant.greeting} ${assistant.tagline} Open the assistant.`}>
+      <strong>{assistant.greeting}</strong>
+      <span>{assistant.tagline}</span>
+    </button>
+    <button class="assistant-bubble-close" type="button" aria-label="Hide greeting" title="Hide">
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+    </button>
+  </div>
+  <button class="assistant-launcher" type="button" aria-label={`Open ${assistant.name}, the website assistant`} aria-haspopup="dialog" aria-controls="assistant-panel" aria-expanded="false" title={`Ask ${assistant.name}`}>
+    <AssistantRobot />
+  </button>
+</div>
+<script>
+  const root = document.getElementById('assistant') as HTMLElement;
+  const btn = root.querySelector('.assistant-launcher') as HTMLButtonElement;
+  const bubble = root.querySelector('.assistant-bubble') as HTMLElement;
+
+  let chat: Promise<typeof import('../assistant/chat')> | undefined;
+  const load = () => (chat ??= import('../assistant/chat'));
+  // Warm the module when the visitor shows intent (hover / keyboard focus); nothing loads otherwise.
+  btn.addEventListener('pointerenter', load, { once: true });
+  btn.addEventListener('focus', load, { once: true });
+
+  let hideTimer: number | undefined;
+  const hideBubble = () => { window.clearTimeout(hideTimer); bubble.hidden = true; root.classList.remove('is-greeting'); };
+  const open = async () => { hideBubble(); const m = await load(); await m.openAssistant(root); };
+  btn.addEventListener('click', open);
+  (bubble.querySelector('.assistant-bubble-main') as HTMLElement).addEventListener('click', open);
+  (bubble.querySelector('.assistant-bubble-close') as HTMLElement).addEventListener('click', () => hideBubble());
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && !bubble.hidden) hideBubble(); });
+
+  // A small greeting appears shortly after each page load and hides itself after a while; nothing is stored.
+  window.setTimeout(() => {
+    if (btn.getAttribute('aria-expanded') === 'true') return;
+    bubble.hidden = false;
+    root.classList.add('is-greeting');
+    hideTimer = window.setTimeout(hideBubble, 14000);
+  }, 1600);
+</script>

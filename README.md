@@ -213,6 +213,28 @@ Notes:
 - To verify ownership, paste the "HTML tag" codes into `site.seo` in `src/data/site.ts` and redeploy.
 - Check social previews with [LinkedIn Post Inspector](https://www.linkedin.com/post-inspector/).
 
+## Website assistant
+
+A floating robot (bottom right) opens a chat that helps visitors find articles and learn about the site. It uses no external AI service, backend or API key.
+
+| Part | Where |
+|---|---|
+| Launcher: waving robot + greeting bubble (the only thing loaded up front, ~1 KB script) | `src/components/Assistant.astro`, `AssistantRobot.astro`, rendered by `src/layouts/Base.astro` |
+| Knowledge index, generated at build time | `src/pages/assistant-index.json.ts` → `/assistant-index.json` |
+| Chat UI (lazy-loaded on first click, ~8 KB gzipped) | `src/assistant/chat.ts`, styles in `src/styles/assistant.css` |
+| Default answer engine (intent matching + article search) | `src/assistant/local-provider.ts`, `src/assistant/search.ts` |
+| Page list used by the header and the assistant | `src/data/nav.ts` |
+
+How it stays up to date: the index is built from the blog collection, `src/data/site.ts` (certifications, projects, links), `src/data/expertise.ts` and `src/data/impact.ts`. Publishing an article or editing those files updates the assistant on the next build; no list is maintained by hand. All URLs include the GitHub Pages base path.
+
+What it will and won't say: it only answers from that index. The site has no per-session speaking or event list, so it gives the totals from `impact.ts` and points to LinkedIn for details. There is no newsletter yet; if you add one, set `newsletter: 'https://…'` in `site.links` (`src/data/site.ts`) and the assistant will point to it.
+
+Name and greeting: edit `src/data/assistant.ts` (name, greeting, tagline). A small greeting bubble with a hide button appears shortly after each page load and hides itself after about 14 seconds; opening the chat or pressing × hides it sooner. Nothing is stored for it.
+
+Privacy: conversations stay in memory only (no cookies or localStorage, and nothing about what was asked is stored) and Reset clears them. If Google Analytics (`gtag`) is present the assistant sends anonymous events only (`assistant_open`, `assistant_question` with the matched intent / result count / length bucket, `assistant_link_click`, `assistant_reset`), never the visitor's text.
+
+Using a Microsoft Foundry or Copilot Studio agent later: implement the `ResponseProvider` interface in `src/assistant/types.ts` (one method, `respond(question, context) → Reply`) that calls your own endpoint, and pass it as `openAssistant(root, { provider })` in `src/components/Assistant.astro`. The UI, suggestions, links and analytics need no changes. Never put keys in the browser: call the agent through your own authenticated endpoint.
+
 ## Assets and trademarks
 
 - Microsoft certification badges, the Microsoft MVP badge and Microsoft product icons come from Microsoft's official public icon sets / Microsoft Learn and remain trademarks of Microsoft. The Model Context Protocol mark is from the official MCP repository.
