@@ -27,9 +27,10 @@ const tags = [...new Set(posts.flatMap(p => p.data.tags))].sort((a, b) => a.loca
       <h1 id="hx-title">Architecting <span class="hx-accent">Intelligent</span> <span class="hx-keep">Enterprise Solutions</span></h1>
       <p class="hx-intro">Microsoft MVP and Senior Software Engineer focused on building secure, scalable business applications and exploring enterprise Agentic AI architectures across Microsoft Power Platform, Microsoft Foundry, and connected data platforms.</p>
       <ul class="hx-certs" aria-label="Microsoft certifications">
-        <li><a class="hx-cert hx-cert-mvp" href={site.links.mvp} target="_blank" rel="noopener" title={`Microsoft MVP, ${mvp.category}`}><img src={url(mvp.badgeSmall)} alt="" width="44" height="44" /><span>MVP</span></a></li>
-        {certifications.map(c => <li><a class="hx-cert" href={url('/credentials/')} title={c.title}><img src={url(`/badges/${c.badge}.svg`)} alt="" width="44" height="44" loading="lazy" /><span>{c.code}</span></a></li>)}
+        <li><a class="hx-cert hx-cert-mvp" href={site.links.mvp} target="_blank" rel="noopener" title={`Microsoft MVP, ${mvp.category}`}><img src={url(mvp.badgeSmall)} alt="" width="28" height="28" /><span>MVP</span></a></li>
+        {certifications.map(c => <li><a class="hx-cert" href={url('/credentials/')} title={c.title}><img src={url(`/badges/${c.badge}.svg`)} alt="" width="28" height="28" loading="lazy" /><span>{c.code}</span></a></li>)}
       </ul>
+      <div class="hx-kpis" id="impact"><KpiStrip articles={posts.length} /></div>
       <p class="hx-meta">Senior Software Engineer <span aria-hidden="true">·</span> {site.location}</p>
     </div>
     <div class="hx-visual">
@@ -38,10 +39,8 @@ const tags = [...new Set(posts.flatMap(p => p.data.tags))].sort((a, b) => a.loca
   </div>
 </section>
 
-<section class="container kpi-section" id="impact"><KpiStrip articles={posts.length} /></section>
-
 <section class="section container" id="writing">
-  <SectionHeading title="Technical Articles" subtitle="Practical implementation guides, architecture patterns and technical insights."/>
+  <SectionHeading title="Technical Articles & Insights" subtitle="Practical implementation guides, enterprise architecture patterns, and technical insights across Agentic AI, Microsoft Foundry, Copilot Studio, Power Platform, and Azure."/>
   <div class="blog-controls">
     <div class="blog-controls-row">
       <label class="blog-search"><span aria-hidden="true">⌕</span><input type="search" id="home-search" placeholder="Search titles, topics and tags..." aria-label="Search articles" /></label>

@@ -1,7 +1,7 @@
 ---
-// Contribution KPIs: compact stat cards styled like the rest of the site (same card surface, border, radius and blue accent).
+// Contribution KPIs: a compact four-column row shown at the bottom of the Home hero (no cards or heading).
 // Numbers count up when scrolled into view (static final numbers without JavaScript or with reduced motion).
-// Values come from the site content (article count) and src/data/impact.ts; the biggest figure comes first.
+// Values come from the site content (article count) and src/data/impact.ts; shown in a fixed order.
 import { impact } from '../data/impact';
 interface Props { articles: number }
 const { articles } = Astro.props;
@@ -16,12 +16,12 @@ const icons: Record<string, string> = {
 };
 type Card = { value: number; suffix?: string; label: string; note?: string; icon: string };
 const cards: Card[] = [
-  { value: articles, label: 'Technical articles', note: 'Guides and architecture notes', icon: 'article' },
-  impact.articleViews != null ? { value: impact.articleViews, label: 'Article reads', note: 'Readers across all posts', icon: 'eye' } : null,
-  impact.eventsOrganized != null ? { value: impact.eventsOrganized, label: 'Events organized', note: 'Community events I led', icon: 'calendar' } : null,
-  impact.speakingSessions != null ? { value: impact.speakingSessions, label: 'Speaking sessions', note: 'Events as a speaker', icon: 'mic' } : null,
+  { value: articles, label: 'Published Articles', icon: 'article' },
+  impact.articleViews != null ? { value: impact.articleViews, label: 'Article Views', icon: 'eye' } : null,
+  impact.speakingSessions != null ? { value: impact.speakingSessions, label: 'Speaking Sessions', icon: 'mic' } : null,
+  impact.eventsOrganized != null ? { value: impact.eventsOrganized, label: 'Events Organized', icon: 'calendar' } : null,
   ...impact.extra.map(e => ({ ...e, icon: e.icon ?? 'users' })),
-].filter(Boolean).sort((a, b) => b!.value - a!.value) as Card[]; // highest figure first
+].filter(Boolean) as Card[]; // fixed order: Published Articles first, then views, speaking, events
 const fmt = (n: number) => n.toLocaleString('en-US');
 ---
 <ul class="kpis" aria-label="Contribution highlights">
