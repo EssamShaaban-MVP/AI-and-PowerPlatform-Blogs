@@ -231,6 +231,8 @@ What it will and won't say: it only answers from that index. The site has no per
 
 Name and greeting: edit `src/data/assistant.ts` (name, greeting, tagline). A small greeting bubble with a hide button appears shortly after each page load and hides itself after about 14 seconds; opening the chat or pressing × hides it sooner. Nothing is stored for it.
 
+Sound: when the greeting appears it plays a short two-note notification chime, synthesised in the browser (Web Audio, no sound file). Browsers block sound until the visitor has interacted with the page, so the chime plays only if the visitor has already clicked or typed on that page; otherwise the greeting is silent. To change or remove it, edit the `chime` function in `src/components/Assistant.astro`.
+
 Privacy: conversations stay in memory only (no cookies or localStorage, and nothing about what was asked is stored) and Reset clears them. If Google Analytics (`gtag`) is present the assistant sends anonymous events only (`assistant_open`, `assistant_question` with the matched intent / result count / length bucket, `assistant_link_click`, `assistant_reset`), never the visitor's text.
 
 Using a Microsoft Foundry or Copilot Studio agent later: implement the `ResponseProvider` interface in `src/assistant/types.ts` (one method, `respond(question, context) → Reply`) that calls your own endpoint, and pass it as `openAssistant(root, { provider })` in `src/components/Assistant.astro`. The UI, suggestions, links and analytics need no changes. Never put keys in the browser: call the agent through your own authenticated endpoint.
